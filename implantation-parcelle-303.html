@@ -698,9 +698,19 @@ function fmt(v){ return v.toFixed(2).replace('.',','); }
 
 /* ---------- état ---------- */
 /* Scénario appliqué à l'ouverture ET par le bouton « Réinitialiser » :
-   le PREMIER scénario embarqué s'il en existe un, sinon DEFAULT_STATE. */
+   le scénario embarqué dont l'index est donné par le paramètre d'URL
+   ?scenario=N (0 = premier), sinon le PREMIER scénario embarqué,
+   sinon DEFAULT_STATE. */
+function getRequestedScenarioIndex(){
+  const raw = new URLSearchParams(location.search).get('scenario');
+  if(raw===null) return null;
+  const idx = parseInt(raw,10);
+  return Number.isInteger(idx) ? idx : null;
+}
+const REQUESTED_SCENARIO_INDEX = getRequestedScenarioIndex();
+const INITIAL_SCENARIO_INDEX = (REQUESTED_SCENARIO_INDEX!==null && EMBEDDED_SCENARIOS[REQUESTED_SCENARIO_INDEX]) ? REQUESTED_SCENARIO_INDEX : 0;
 const INITIAL_SCENARIO = EMBEDDED_SCENARIOS.length
-  ? EMBEDDED_SCENARIOS[0]
+  ? EMBEDDED_SCENARIOS[INITIAL_SCENARIO_INDEX]
   : {name:'', state:DEFAULT_STATE, measures:[]};
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let view = {scale:18, tx:0, ty:0};
@@ -1417,10 +1427,11 @@ drawParcelCotes();
 document.getElementById('btnCotes').classList.add('active');
 syncSimUI();
 fillScenarios();
-/* charge d'emblée le premier scénario embarqué (INITIAL_SCENARIO) */
+/* charge d'emblée le scénario embarqué désigné par INITIAL_SCENARIO_INDEX
+   (index par défaut, ou forcé via ?scenario=N dans l'URL) */
 if(EMBEDDED_SCENARIOS.length){
-  try{ loadScenario(INITIAL_SCENARIO); document.getElementById('scnSelect').value='0'; }
-  catch(e){ console.warn('Scénario embarqué n°1 invalide :', e.message); }
+  try{ loadScenario(INITIAL_SCENARIO); document.getElementById('scnSelect').value=String(INITIAL_SCENARIO_INDEX); }
+  catch(e){ console.warn('Scénario embarqué n°'+(INITIAL_SCENARIO_INDEX+1)+' invalide :', e.message); }
 }
 renderItems();
 fitView();
