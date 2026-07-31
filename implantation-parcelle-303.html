@@ -193,9 +193,23 @@ source d'information.
       chaque interaction (drag = re-render complet, suffisamment rapide).
     · Interactions : pointerdown/move/up sur le SVG (drag objets, poignée
       de rotation avec aimantation sur snap_angles ±2.5° sauf touche Alt,
-      points de route, extrémités de la limite simulée, pan) ; molette =
-      zoom vers le curseur ; clavier : flèches 0.10 m (Maj 0.50, Alt
-      0.02), Q/E rotation, C cotes, M règle, Suppr.
+      points de route, extrémités de la limite simulée, sélection d'une
+      mesure à la règle via data-measure, pan) ; molette = zoom vers le
+      curseur ; clavier : flèches 0.10 m (Maj 0.50, Alt 0.02), Q/E
+      rotation, C cotes, M règle, Suppr (objet OU mesure sélectionnée).
+    · Mesures à la règle : tableau measures (paires de points, exporté
+      avec le scénario), rendues par renderMeasures() dans gMeasure et
+      listées par renderMeasList() dans la carte « Mesures et cotes ».
+      selMeasure = index de la mesure sélectionnée (exclusif avec selId) ;
+      elle se supprime comme un objet (croix ✕ de la ligne, bouton
+      « Supprimer » de la carte de sélection, ou touche Suppr) ou toutes
+      d'un coup avec « Tout effacer » (delMeasure / btnMeasClear).
+    · Deux cases d'affichage indépendantes dans cette carte :
+      lyParcelCotes (cotes embarquées des limites de la parcelle, groupe
+      gCotes rempli une fois par drawParcelCotes() ; visible seulement si
+      showCotes ET showParcelCotes → applyParcelCotes()) et lyMeasures
+      (groupe gMeasure, showMeasures() ; réactivé automatiquement quand on
+      lance la règle ou qu'on trace une mesure).
     · Vue : transform du groupe #world {scale px/m, tx, ty}.
 11. GUIDE DE MODIFICATION (pour un LLM)
     · Le fichier est auto-suffisant : modifier directement le JS/CSS ici.
@@ -241,6 +255,13 @@ source d'information.
       recule d'autant (longueur totale 18.95 → 15.30 m), l'escalier ouest
       suit ; le rectangle déterminant reste 9.24 × 15.30 m et devient le
       bâtiment entier.
+    · v12 : carte « Mesures et cotes » : case pour afficher/masquer les
+      cotes embarquées des limites de la parcelle 303 (indépendamment des
+      cotes des objets), case pour afficher/masquer d'un coup toutes les
+      mesures à la règle, et liste des mesures avec suppression
+      individuelle (croix ✕, sélection + « Supprimer » ou touche Suppr,
+      sélection possible en cliquant la mesure sur le plan) ou globale
+      (« Tout effacer »).
 13. AVERTISSEMENT
     Document de travail destiné aux études de variantes. Ne remplace ni un
     plan de géomètre officiel ni le règlement communal des constructions.
@@ -290,6 +311,9 @@ input[type=range]{width:100%}
 .objRow .nm{flex:1}
 .objRow .eye{opacity:.55;cursor:pointer}
 .objRow .eye.off{opacity:.18}
+.objRow .del{opacity:.45;cursor:pointer;color:var(--bad);font-weight:700;padding:0 3px}
+.objRow .del:hover{opacity:1}
+.objRow .len{color:var(--muted);font-variant-numeric:tabular-nums}
 .props .fld{display:flex;align-items:center;justify-content:space-between;margin:4px 0}
 .props input[type=number]{width:84px;font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:5px}
 .hint{color:var(--muted);font-size:11px;line-height:1.45;margin-top:6px}
@@ -366,7 +390,19 @@ footer{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:10px}
         <button id="btnRotR">⟳ +1°</button>
         <button id="btnDelete" style="color:var(--bad)">Supprimer</button>
       </div>
-      <div class="hint">Flèches : déplacer (0.10 m) · Maj+flèches : 0.50 m · Alt+flèches : 0.02 m · Q/E : pivoter ±0.5° · rotation aimantée aux limites (Alt pour libérer)</div>
+      <div class="hint" id="propsHint">Flèches : déplacer (0.10 m) · Maj+flèches : 0.50 m · Alt+flèches : 0.02 m · Q/E : pivoter ±0.5° · rotation aimantée aux limites (Alt pour libérer)</div>
+    </div>
+
+    <div class="card">
+      <h2>Mesures et cotes</h2>
+      <label class="chk"><input type="checkbox" id="lyParcelCotes" checked> Cotes des limites de la parcelle 303</label>
+      <label class="chk"><input type="checkbox" id="lyMeasures" checked> Mesures à la règle</label>
+      <div id="measList"></div>
+      <div class="row">
+        <button id="btnMeasure2">📐 Mesurer</button>
+        <button id="btnMeasClear">Tout effacer</button>
+      </div>
+      <div class="hint">« Cotes des limites de la parcelle 303 » affiche ou masque les longueurs embarquées de chaque côté de la parcelle (elles restent soumises au bouton « 📏 Cotes » de la barre d'outils, qui masque toutes les cotes). « Mesures à la règle » affiche ou masque d'un coup toutes les mesures tracées à la main (y compris celles chargées avec un scénario). Pour en ajouter : bouton « Mesurer » (touche M) puis cliquer deux points. Pour en supprimer une : la sélectionner (dans la liste ou sur le plan) puis « Supprimer » ou la touche Suppr, ou cliquer la croix ✕ de sa ligne.</div>
     </div>
 
     <div class="card">
@@ -715,6 +751,9 @@ const INITIAL_SCENARIO = EMBEDDED_SCENARIOS.length
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let view = {scale:18, tx:0, ty:0};
 let selId = null, measuring=false, measures=[], measurePt=null, showCotes=true;
+/* selMeasure : index de la mesure à la règle sélectionnée (null si aucune) ;
+   showParcelCotes : cotes embarquées des limites de la parcelle 303 (gCotes) */
+let selMeasure = null, showParcelCotes = true;
 const svg = document.getElementById('map');
 const world = document.getElementById('world');
 
@@ -1084,17 +1123,49 @@ function renderDistances(){
   }
 }
 
-/* ---------- mesures ---------- */
+/* ---------- mesures (règle) ---------- */
+function measureLen(m){ return Math.hypot(m[1][0]-m[0][0],m[1][1]-m[0][1]); }
 function renderMeasures(){
   gMeasure.innerHTML='';
-  for(const m of measures){
-    el('line',{x1:m[0][0],y1:m[0][1],x2:m[1][0],y2:m[1][1],stroke:'#0e7490','stroke-width':1.5,'vector-effect':'non-scaling-stroke'},gMeasure);
-    for(const p of m) el('circle',{cx:p[0],cy:p[1],r:0.15,fill:'#0e7490'},gMeasure);
-    const d=Math.hypot(m[1][0]-m[0][0],m[1][1]-m[0][1]);
-    const t=el('text',{x:(m[0][0]+m[1][0])/2,y:(m[0][1]+m[1][1])/2-0.35,'font-size':0.9,class:'lbl','text-anchor':'middle',fill:'#0e7490','font-weight':'bold'},gMeasure);
-    t.textContent=fmt(d)+' m';
-  }
+  measures.forEach((m,i)=>{
+    const sel = i===selMeasure;
+    const col = sel? '#1d4ed8' : '#0e7490';
+    // ligne de saisie élargie et invisible : facilite la sélection au clic
+    el('line',{x1:m[0][0],y1:m[0][1],x2:m[1][0],y2:m[1][1],stroke:col,'stroke-opacity':0,'stroke-width':9,
+      'pointer-events':'stroke',cursor:'pointer','vector-effect':'non-scaling-stroke','data-measure':i},gMeasure);
+    el('line',{x1:m[0][0],y1:m[0][1],x2:m[1][0],y2:m[1][1],stroke:col,'stroke-width':sel?3:1.5,
+      'pointer-events':'none','vector-effect':'non-scaling-stroke'},gMeasure);
+    for(const p of m) el('circle',{cx:p[0],cy:p[1],r:sel?0.22:0.15,fill:col,'pointer-events':'none'},gMeasure);
+    const t=el('text',{x:(m[0][0]+m[1][0])/2,y:(m[0][1]+m[1][1])/2-0.35,'font-size':0.9,class:'lbl','text-anchor':'middle',fill:col,'font-weight':'bold'},gMeasure);
+    t.textContent=fmt(measureLen(m))+' m';
+  });
   if(measurePt) el('circle',{cx:measurePt[0],cy:measurePt[1],r:0.2,fill:'#0e7490'},gMeasure);
+  renderMeasList();
+}
+/* liste des mesures dans le panneau : sélection, suppression individuelle */
+function renderMeasList(){
+  const c=document.getElementById('measList'); if(!c) return;
+  c.innerHTML='';
+  if(!measures.length){
+    const d=document.createElement('div'); d.className='hint'; d.style.marginTop='2px';
+    d.textContent='Aucune mesure tracée pour l’instant.';
+    c.appendChild(d); return;
+  }
+  measures.forEach((m,i)=>{
+    const r=document.createElement('div'); r.className='objRow'+(i===selMeasure?' sel':'');
+    r.innerHTML='<span class="nm">Mesure '+(i+1)+' <span class="len">· '+fmt(measureLen(m))+' m</span></span>'
+               +'<span class="del" title="Supprimer cette mesure">✕</span>';
+    r.querySelector('.del').onclick=e=>{ e.stopPropagation(); delMeasure(i); };
+    r.onclick=()=>{ selMeasure=i; selId=null; renderItems(); };
+    c.appendChild(r);
+  });
+}
+function delMeasure(i){
+  if(i===null||i===undefined||!measures[i]) return;
+  measures.splice(i,1);
+  if(selMeasure===i) selMeasure=null;
+  else if(selMeasure!==null && selMeasure>i) selMeasure--;
+  renderItems();
 }
 
 /* ---------- panneau objets ---------- */
@@ -1104,13 +1175,28 @@ function renderObjList(){
     const r=document.createElement('div'); r.className='objRow'+(it.id===selId?' sel':'');
     r.innerHTML=`<span class="eye${it.hidden?' off':''}">👁</span><span class="nm">${itemLabel(it)}</span>`;
     r.querySelector('.eye').onclick=(e)=>{e.stopPropagation(); it.hidden=!it.hidden; renderItems();};
-    r.onclick=()=>{selId=it.id; renderItems();};
+    r.onclick=()=>{selId=it.id; selMeasure=null; renderItems();};
     c.appendChild(r);
   }
 }
 function renderProps(){
   const card=document.getElementById('propsCard');
+  const rotL=document.getElementById('btnRotL'), rotR=document.getElementById('btnRotR');
+  const hint=document.getElementById('propsHint');
   const it=state.items.find(i=>i.id===selId);
+  // une mesure à la règle est sélectionnée : même carte, avec le bouton « Supprimer »
+  if(!it && selMeasure!==null && measures[selMeasure]){
+    card.style.display='block';
+    document.getElementById('propsTitle').textContent='Mesure '+(selMeasure+1);
+    const f=document.getElementById('propsFields'); f.innerHTML='';
+    const d=document.createElement('div'); d.className='dist';
+    d.innerHTML='<span>Longueur</span><b>'+fmt(measureLen(measures[selMeasure]))+' m</b>';
+    f.appendChild(d);
+    rotL.style.display='none'; rotR.style.display='none'; hint.style.display='none';
+    document.getElementById('btnDelete').style.display='inline-block';
+    return;
+  }
+  rotL.style.display=''; rotR.style.display=''; hint.style.display='';
   if(!it){card.style.display='none';return;}
   card.style.display='block';
   document.getElementById('propsTitle').textContent=itemLabel(it);
@@ -1172,8 +1258,13 @@ svg.addEventListener('pointerdown',ev=>{
   ev.preventDefault(); // empêche la sélection de texte native pendant le drag
   const w=clientToWorld(ev);
   if(measuring){
-    if(!measurePt){ measurePt=w; } else { measures.push([measurePt,w]); measurePt=null; }
+    if(!measurePt){ measurePt=w; } else { measures.push([measurePt,w]); measurePt=null; showMeasures(true); }
     renderMeasures(); return;
+  }
+  // sélection d'une mesure à la règle (pour la supprimer comme un objet)
+  const mIdx=ev.target.getAttribute&&ev.target.getAttribute('data-measure');
+  if(mIdx!==null&&mIdx!==undefined&&mIdx!==''){
+    selMeasure=+mIdx; selId=null; renderItems(); return;
   }
   const simPt=ev.target.getAttribute&&ev.target.getAttribute('data-sim-pt');
   if(simPt){
@@ -1197,13 +1288,13 @@ svg.addEventListener('pointerdown',ev=>{
   const id=t&&t.getAttribute&&t.getAttribute('data-id');
   if(id){
     const it=state.items.find(i=>i.id===id);
-    selId=id;
+    selId=id; selMeasure=null;
     if(it.type==='route') drag={mode:'routeAll',it,start:w,pts0:it.pts.map(p=>[...p])};
     else drag={mode:'move',it,start:w,x0:it.x,y0:it.y};
     renderItems();
     svg.setPointerCapture(ev.pointerId);
   } else {
-    selId=null; renderItems();
+    selId=null; selMeasure=null; renderItems();
     drag={mode:'pan',start:[ev.clientX,ev.clientY],tx0:view.tx,ty0:view.ty};
     svg.classList.add('dragging');
     svg.setPointerCapture(ev.pointerId);
@@ -1293,9 +1384,11 @@ svg.addEventListener('wheel',ev=>{
 document.addEventListener('keydown',ev=>{
   if(ev.target.tagName==='INPUT') return;
   const it=state.items.find(i=>i.id===selId);
-  if(ev.key==='Escape'){ if(measuring){toggleMeasure();} selId=null; measurePt=null; renderItems(); return; }
+  if(ev.key==='Escape'){ if(measuring){toggleMeasure();} selId=null; selMeasure=null; measurePt=null; renderItems(); return; }
   if(ev.key==='c'||ev.key==='C'){ toggleCotes(); return; }
   if(ev.key==='m'||ev.key==='M'){ toggleMeasure(); return; }
+  // mesure sélectionnée : supprimable au clavier comme un objet
+  if(selMeasure!==null && (ev.key==='Delete'||ev.key==='Backspace')){ ev.preventDefault(); delMeasure(selMeasure); return; }
   if(!it) return;
   const step=ev.shiftKey?0.5:(ev.altKey?0.02:0.1);
   const mv={ArrowLeft:[-step,0],ArrowRight:[step,0],ArrowUp:[0,-step],ArrowDown:[0,step]}[ev.key];
@@ -1311,19 +1404,31 @@ document.addEventListener('keydown',ev=>{
 });
 
 /* ---------- boutons ---------- */
+/* cotes embarquées des limites de la parcelle (gCotes) : visibles seulement si
+   le bouton général « Cotes » ET la case « Cotes des limites de la parcelle 303 » le sont */
+function applyParcelCotes(){ gCotes.style.display=(showCotes&&showParcelCotes)?'':'none'; }
 function toggleCotes(){
   showCotes=!showCotes;
   document.getElementById('btnCotes').classList.toggle('active',showCotes);
-  gCotes.style.display=showCotes?'':'none';
+  applyParcelCotes();
   renderItems();
+}
+/* affichage global des mesures à la règle (case « Mesures à la règle ») */
+function showMeasures(on){
+  const cb=document.getElementById('lyMeasures');
+  if(on!==undefined) cb.checked=on;
+  gMeasure.style.display=cb.checked?'':'none';
 }
 function toggleMeasure(){
   measuring=!measuring; measurePt=null;
   document.getElementById('btnMeasure').classList.toggle('active',measuring);
+  document.getElementById('btnMeasure2').classList.toggle('active',measuring);
   svg.classList.toggle('measuring',measuring);
-  if(!measuring) renderMeasures();
+  if(measuring) showMeasures(true);          // inutile de mesurer sur un calque masqué
+  else renderMeasures();
 }
 function delSelected(){
+  if(selMeasure!==null){ delMeasure(selMeasure); return; }
   const i=state.items.findIndex(x=>x.id===selId);
   if(i>=0&&state.items[i].type!=='building'){ state.items.splice(i,1); selId=null; renderItems(); }
 }
@@ -1342,6 +1447,11 @@ document.getElementById('btnRotL').onclick=()=>{const it=state.items.find(i=>i.i
 document.getElementById('btnRotR').onclick=()=>{const it=state.items.find(i=>i.id===selId); if(it){it.rot=(it.rot||0)+1;renderItems();}};
 document.getElementById('btnCotes').onclick=toggleCotes;
 document.getElementById('btnMeasure').onclick=toggleMeasure;
+document.getElementById('btnMeasure2').onclick=toggleMeasure;
+document.getElementById('btnMeasClear').onclick=()=>{
+  if(!measures.length) return;
+  if(confirm('Supprimer les '+measures.length+' mesure(s) tracée(s) ?')){ measures=[]; selMeasure=null; measurePt=null; renderItems(); }
+};
 document.getElementById('btnZoomIn').onclick=()=>{const w=svg.clientWidth/2,h=svg.clientHeight/2;view.tx=w-(w-view.tx)*1.25;view.ty=h-(h-view.ty)*1.25;view.scale*=1.25;applyView();};
 document.getElementById('btnZoomOut').onclick=()=>{const w=svg.clientWidth/2,h=svg.clientHeight/2;view.tx=w-(w-view.tx)/1.25;view.ty=h-(h-view.ty)/1.25;view.scale/=1.25;applyView();};
 document.getElementById('btnFit').onclick=fitView;
@@ -1359,7 +1469,7 @@ function loadScenario(d){
   measures=d.measures? JSON.parse(JSON.stringify(d.measures)) : [];
   document.getElementById('scnName').value=d.name||'';
   idCounter=100+state.items.reduce((m,i)=>Math.max(m, parseInt((i.id||'').replace(/\D/g,''))||0),0);
-  selId=null; syncSimUI(); renderItems();
+  selId=null; selMeasure=null; measurePt=null; syncSimUI(); renderItems();
 }
 function fillScenarios(){
   const s=document.getElementById('scnSelect'); s.innerHTML='';
@@ -1393,6 +1503,9 @@ document.getElementById('lyBand').onchange=e=>gBand.style.display=e.target.check
 document.getElementById('ly159').onchange=e=>g159.style.display=e.target.checked?'':'none';
 document.getElementById('lyCtx').onchange=e=>gCtx.style.display=e.target.checked?'':'none';
 document.getElementById('lyDist').onchange=()=>renderItems();
+/* cotes de la parcelle + mesures à la règle */
+document.getElementById('lyParcelCotes').onchange=e=>{ showParcelCotes=e.target.checked; applyParcelCotes(); };
+document.getElementById('lyMeasures').onchange=()=>showMeasures();
 /* variante du bâtiment : sans les 3 places couvertes */
 function syncBuildingUI(){
   const b=state.items.find(i=>i.type==='building');
@@ -1425,6 +1538,8 @@ document.getElementById('btnSimReset').onclick=()=>{ ensureSim(); state.simLimit
 buildStatic();
 drawParcelCotes();
 document.getElementById('btnCotes').classList.add('active');
+applyParcelCotes();
+showMeasures();
 syncSimUI();
 fillScenarios();
 /* charge d'emblée le scénario embarqué désigné par INITIAL_SCENARIO_INDEX
