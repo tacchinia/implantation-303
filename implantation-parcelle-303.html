@@ -1039,10 +1039,10 @@ function renderSim(){
   // étiquettes
   const t1=el('text',{x:mx-nx*1.5,y:my-ny*1.5,'font-size':0.95,class:'lbl','text-anchor':'middle',fill:'#7c3aed','font-weight':'bold',
     transform:`rotate(${Math.atan2(dy,dx)/D2R>90||Math.atan2(dy,dx)/D2R<-90?Math.atan2(dy,dx)/D2R+180:Math.atan2(dy,dx)/D2R} ${mx-nx*1.5} ${my-ny*1.5})`},gSim);
-  t1.textContent='Nouvelle limite (simulation) · ≈ '+fmt(A)+' m² à acquérir ('+tag+')';
+  t1.textContent='≈'+fmt(A)+' m²';
   const t2=el('text',{x:mx+nx*3.4,y:my+ny*3.4,'font-size':0.75,class:'lbl','text-anchor':'middle',fill:'#7c3aed',opacity:.85,
     transform:`rotate(${Math.atan2(dy,dx)/D2R>90||Math.atan2(dy,dx)/D2R<-90?Math.atan2(dy,dx)/D2R+180:Math.atan2(dy,dx)/D2R} ${mx+nx*3.4} ${my+ny*3.4})`},gSim);
-  t2.textContent='retrait 3 m (limite simulée)';
+  t2.textContent='';
   if(showCotes){
     const tc=el('text',{x:mx-nx*0.4,y:my-ny*0.4,'font-size':0.8,class:'lbl dimlbl','text-anchor':'middle',
       transform:`rotate(${Math.atan2(dy,dx)/D2R>90||Math.atan2(dy,dx)/D2R<-90?Math.atan2(dy,dx)/D2R+180:Math.atan2(dy,dx)/D2R} ${mx-nx*0.4} ${my-ny*0.4})`},gSim);
