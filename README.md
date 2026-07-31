@@ -16,6 +16,11 @@ Outil interactif **autonome** (un seul fichier HTML, sans dépendance ni serveur
 - Dimensions du bâtiment simulables (largeur / longueur).
 - Terrasse, places de parking, route d'accès éditable, gabarit de braquage, outil règle,
   cotes affichables/masquables.
+- Carte « Mesures et cotes » : case pour afficher ou masquer les **cotes embarquées des
+  limites de la parcelle 303**, case pour afficher ou masquer d'un coup **toutes les
+  mesures tracées à la règle**, et liste de ces mesures — chacune se supprime
+  individuellement (croix ✕, ou sélection puis « Supprimer » / touche Suppr, comme pour
+  les objets posés sur le terrain), ou toutes ensemble avec « Tout effacer ».
 - Simulation d'une nouvelle limite est (variante d'acquisition de terrain).
 - Export / import JSON des scénarios, et **scénarios embarqués** directement dans le
   fichier : le premier de la liste est chargé automatiquement à l'ouverture.
