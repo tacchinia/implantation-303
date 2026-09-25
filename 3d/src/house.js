@@ -167,10 +167,9 @@ export function buildHouse(M) {
   g.add(boxB(0.02, 0.24, 0, L1 - 0.3, 1.12, 1.34, M.render));
   g.add(boxB(W - 0.24, W - 0.02, 0, L1 - 0.3, 1.12, 1.34, M.render));
 
-  // terrasse de l'étage + coursive (dalle béton), escalier extérieur
+  // terrasse de l'étage + coursive (dalle béton en porte-à-faux, sans poteaux), escalier extérieur
   g.add(boxB(-1.14, 2.07, L1 - 0.2, L1 + 0.05, 7.7, LEN + 0.25, M.concrete));
   g.add(boxB(-1.14, 0, L1 - 0.2, L1 + 0.05, 6.44, 7.7, M.concrete));
-  for (const v of [6.5, 9.6, 12.6, LEN + 0.15]) g.add(boxB(-1.12, -1.02, 0, L1 - 0.2, v - 0.05, v + 0.05, M.metal));
   const nR = 17, rise = (L1 + 0.05) / nR, going = 4.0 / 16;
   for (let i = 0; i < 16; i++) {
     const v0 = 2.44 + i * going;
