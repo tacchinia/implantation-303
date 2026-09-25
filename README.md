@@ -20,7 +20,10 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
   jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
 - teintes d'enduit, de toiture et de menuiseries ;
 - rue de la Mairie, accès et places en **pavés gazon**, limites de parcelle, voisins
-  schématiques, arbres et haies ;
+  schématiques ; muret de 30 × 15 cm en limite sud ; petits arbustes d'essences variées
+  le long de la rue (sauf l'accès de 5 m) ; balcon/coursive en dalle béton ; terrasse
+  de l'ancienne maison en hauteur (1er étage, deux piliers bois) ; côté est de
+  l'ancienne maison pavé jusqu'à la limite ; quelques arbres aux alentours ;
 - soleil réglable (heure, mois) avec ombres portées, points de vue prédéfinis, boussole.
 
 Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.html`.

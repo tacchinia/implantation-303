@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { GEO, SCENARIO } from './data.js';
 import { rng, labelTexture } from './textures.js';
-import { box, boxUV } from './house.js';
+import { box, boxUV, railings } from './house.js';
 
 // origine de la scène : centre approximatif du nouveau bâtiment
 export const OX = 16, OZ = 36;
@@ -125,6 +125,42 @@ function makeTreeFactory(M) {
       }
       return g;
     },
+    // petits arbustes d'ornement, essences variées (bord de route)
+    smallShrub(r, H, sp) {
+      const g = new THREE.Group();
+      const blobs = (mat, n, spread, sy = 0.85) => {
+        for (let i = 0; i < n; i++) {
+          const s = H * (0.35 + r() * 0.25);
+          add(g, ico, mat, (r() - 0.5) * spread, s * sy * 0.9 + r() * H * 0.25, (r() - 0.5) * spread, s * (0.8 + r() * 0.4), s * sy, s * (0.8 + r() * 0.4));
+        }
+      };
+      switch (sp) {
+        case 'buis': blobs(M.shrubs.buis, 2 + Math.floor(r() * 2), H * 0.35, 0.9); break;
+        case 'berberis': blobs(M.shrubs.berberis, 3, H * 0.5); break;
+        case 'spiree': blobs(M.shrubs.spiree, 4, H * 0.7, 0.7); break;
+        case 'lavande':
+          for (let i = 0; i < 7; i++) {
+            const a = r() * 6.3, d = r() * H * 0.45;
+            add(g, ico, i < 3 ? M.shrubs.lavandeLeaf : M.shrubs.lavande, Math.cos(a) * d, H * (0.3 + r() * 0.35), Math.sin(a) * d, H * 0.22, H * 0.35, H * 0.22);
+          }
+          break;
+        case 'cornouiller':
+          for (let i = 0; i < 7; i++) {
+            const m = add(g, trunkG, M.shrubs.cornStem, (r() - 0.5) * H * 0.4, H * 0.4, (r() - 0.5) * H * 0.4, 0.018, H * 0.8, 0.018);
+            m.rotation.set((r() - 0.5) * 0.5, 0, (r() - 0.5) * 0.5);
+          }
+          blobs(M.shrubs.cornLeaf, 3, H * 0.6, 0.6);
+          break;
+        case 'thuya': add(g, cone, M.shrubs.thuya, 0, H * 0.5, 0, H * 0.28, H, H * 0.28); break;
+        case 'graminee':
+          for (let i = 0; i < 9; i++) {
+            const m = add(g, cone, M.shrubs.graminee, (r() - 0.5) * H * 0.3, H * 0.45, (r() - 0.5) * H * 0.3, 0.06, H * 0.9, 0.06);
+            m.rotation.set((r() - 0.5) * 0.6, 0, (r() - 0.5) * 0.6);
+          }
+          break;
+      }
+      return g;
+    },
     shrub(r, H) {
       const g = new THREE.Group(), fm = M.foliage[Math.floor(r() * M.foliage.length)];
       for (let i = 0; i < 3; i++) add(g, ico, fm, (r() - 0.5) * H, H * 0.45, (r() - 0.5) * H, H * 0.6, H * 0.5, H * 0.6);
@@ -183,10 +219,29 @@ export function buildSite(M, scene) {
     const t = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: labelTexture(p.label, { w: 256, h: 128, font: '700 90px Archivo, Arial, sans-serif', color: 'rgba(255,255,255,.8)' }), transparent: true, depthWrite: false }));
     t.rotation.set(-Math.PI / 2, 0, -p.rot * D2R); t.position.set(x, 0.04, z + 1.6); root.add(t);
   }
-  // terrasse de la maison 169
+  // terrasse de la maison 169 : en hauteur, au niveau du 1er étage, sur deux piliers bois
   {
-    const p = SCENARIO.terrace169, m = box(p.w, 0.12, p.h, M.deck);
-    const [x, z] = w2(p.x, p.y); m.position.set(x, 0.06, z); m.rotation.y = -p.rot * D2R; root.add(m);
+    const p = SCENARIO.terrace169, hw = p.w / 2, hd = p.h / 2, top = 2.8;
+    const t = new THREE.Group();
+    const [x, z] = w2(p.x, p.y); t.position.set(x, 0, z); t.rotation.y = -p.rot * D2R;
+    t.add(box(p.w, 0.08, p.h, M.deck, 0, top - 0.04, 0));
+    t.add(box(p.w, 0.2, 0.14, M.timber, 0, top - 0.18, hd - 0.12));      // sommier sud
+    for (const sx of [-1, 1]) {
+      t.add(box(0.12, 0.2, p.h, M.timber, sx * (hw - 0.1), top - 0.18, 0)); // solives de rive
+      t.add(box(0.16, top - 0.28, 0.16, M.timber, sx * (hw - 0.15), (top - 0.28) / 2, hd - 0.15)); // piliers
+    }
+    t.add(railings([
+      { a: [-hw + 0.03, -hd, top], b: [-hw + 0.03, hd - 0.03, top] },
+      { a: [-hw + 0.03, hd - 0.03, top], b: [hw - 0.03, hd - 0.03, top] },
+      { a: [hw - 0.03, hd - 0.03, top], b: [hw - 0.03, -hd, top] },
+    ], M.metal));
+    t.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    groups.neighbors.add(t);
+  }
+  // côté est de la maison 169 : entièrement pavé jusqu'à la limite de propriété
+  {
+    const pave = new THREE.Mesh(flatPoly([[22.852, 5.309], [27.884, 5.227], [26.605, 16.53], [22.594, 16.531]], 0.03), M.pavedEast);
+    pave.receiveShadow = true; root.add(pave);
   }
 
   // limites de parcelle (ruban clair)
@@ -234,35 +289,57 @@ export function buildSite(M, scene) {
     t.position.set(x, 0, z); t.rotation.y = r() * Math.PI * 2; groups.trees.add(t);
   };
   // arbres choisis dans la parcelle
-  place('deciduous', 9.3, 48.2, 6.5);    // érable, coin sud-ouest
   place('birch', 21.4, 45.8, 8);          // bouleau, coin sud-est
   place('shrub', 16.5, 47.4, 1.4);
   place('shrub', 12.5, 48.6, 1.2);
-  place('deciduous', 24.2, 11.5, 7.5);    // jardin de la maison 169
   // semis aléatoire autour de la parcelle
   let n = 0, guard = 0;
-  while (n < 58 && guard++ < 4000) {
+  while (n < 24 && guard++ < 4000) {
     const p = [-28 + r() * 95, -22 + r() * 100];
     if (pointInPoly(p, GEO.parcel303) || blocked(p, 2.2)) continue;
+    if (Math.hypot(p[0] - CENTER[0], p[1] - CENTER[1]) < 22) continue; // dégager les abords
     // garder dégagés les axes des points de vue (centre du bâtiment → caméra)
     if (VIEW_AXES.some((az) => distSeg(p, CENTER, [CENTER[0] + Math.sin(az * D2R) * 34, CENTER[1] - Math.cos(az * D2R) * 34]) < 5)) continue;
     const k = r();
     place(k < 0.5 ? 'deciduous' : k < 0.75 ? 'conifer' : k < 0.88 ? 'birch' : 'shrub', p[0], p[1], k < 0.88 ? 6 + r() * 9 : 1.2 + r());
     n++;
   }
-  // haies le long des limites sud, ouest (hors accès) et est (partie sud)
-  const hedge = (a, b, h = 1.5, th = 0.8, inset = 0.55) => {
-    const [ax, az] = w2(...a), [bx, bz] = w2(...b);
-    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
-    const m = new THREE.Mesh(boxUV(new THREE.BoxGeometry(L, h, th), L, h, th), M.hedge);
-    // décalage vers l'intérieur de la parcelle (côté gauche du sens horaire)
-    m.position.set((ax + bx) / 2 - uz * inset, h / 2, (az + bz) / 2 + ux * inset);
+  // limite sud : muret de 30 cm de haut, 15 cm de large (côté intérieur de la limite)
+  {
+    const [a, b] = GEO.boundaries.south, [ax, az] = w2(...a), [bx, bz] = w2(...b);
+    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, h = 0.3, th = 0.15;
+    const m = new THREE.Mesh(boxUV(new THREE.BoxGeometry(L, h, th), L, h, th), M.lowWall);
+    m.position.set((ax + bx) / 2 - uz * th / 2, h / 2, (az + bz) / 2 + ux * th / 2);
     m.rotation.y = -Math.atan2(uz, ux);
-    m.castShadow = m.receiveShadow = true; groups.trees.add(m);
-  };
-  hedge([23.367, 47.033], [7.172, 50.897]);
-  hedge([7.172, 50.897], [8.3, 33.8]);
-  hedge([23.281, 36.161], [23.367, 47.033], 1.5, 0.8, 0.55);
+    m.castShadow = m.receiveShadow = true; root.add(m);
+  }
+  // limite ouest (rue) : petits arbustes irréguliers, essences variées, espacés,
+  // du muret sud jusqu'à l'ancienne maison, sauf l'accès de 5 m aux places de parc
+  {
+    const line = [GEO.boundaries.west[0], GEO.boundaries.west[1], GEO.boundaries.west[2], [10.08, 16.2]];
+    const species = ['buis', 'lavande', 'cornouiller', 'thuya', 'spiree', 'berberis', 'graminee'];
+    const heights = { buis: [0.5, 0.8], lavande: [0.45, 0.6], cornouiller: [1.0, 1.4], thuya: [0.8, 1.3], spiree: [0.7, 1.0], berberis: [0.6, 0.95], graminee: [0.8, 1.2] };
+    const access = SCENARIO.route.pts[0];                 // axe de l'accès à la rue
+    let prev = -1, d = 0.6;
+    for (let i = 0; i < line.length - 1; i++) {
+      const [ax, ay] = line[i], [bx, by] = line[i + 1];
+      const L = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / L, uy = (by - ay) / L;
+      while (d < L) {
+        const inset = 0.3 + r() * 0.25;
+        // intérieur de la parcelle : à gauche du sens de parcours (limite parcourue sud → nord)
+        const p = [ax + ux * d - uy * inset, ay + uy * d + ux * inset];
+        if (Math.abs(p[1] - access[1]) > SCENARIO.route.width / 2 + 0.3) {
+          let sp; do { sp = species[Math.floor(r() * species.length)]; } while (sp === prev);
+          prev = sp;
+          const [h0, h1] = heights[sp], H = h0 + r() * (h1 - h0);
+          const t = F.smallShrub(r, H, sp); const [x, z] = w2(...p);
+          t.position.set(x, 0, z); t.rotation.y = r() * 6.3; groups.trees.add(t);
+        }
+        d += 1.1 + r() * 0.8;                             // espacement irrégulier
+      }
+      d -= L;
+    }
+  }
 
   // couronne lointaine (instanciée) pour l'horizon
   {

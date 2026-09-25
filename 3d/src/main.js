@@ -68,10 +68,24 @@ const M = {
   conifer: std({ color: '#2f4f2e', roughness: 1, flatShading: true }),
   foliage: FOLIAGE.summer.map((c) => std({ color: c, roughness: 1, flatShading: true })),
   farFoliage: std({ color: '#4c6b3a', roughness: 1, flatShading: true }),
-  hedge: std({ map: TX.hedgeTexture(), roughness: 1 }),
   carGlass: std({ color: '#1d2429', roughness: 0.1, metalness: 0.4 }),
   tyre: std({ color: '#1b1b1b', roughness: 0.9 }),
   lamp: std({ color: '#f4f1e8', emissive: '#6d6a60', roughness: 0.3 }),
+  concrete: std({ map: TX.renderTexture(), color: '#bdbab3', roughness: 0.9 }),
+  lowWall: std({ map: TX.renderTexture(), color: '#c8c4bb', roughness: 0.9 }),
+  pavedEast: std({ map: TX.paverTexture('#bdb6a8', 0.2, 0.1, 1.2, 47), roughness: 0.9 }),
+  timber: std({ color: '#8a6a4a', roughness: 0.85 }),
+  shrubs: {
+    buis: std({ color: '#2f5a2c', roughness: 1, flatShading: true }),
+    berberis: std({ color: '#6b2a30', roughness: 1, flatShading: true }),
+    spiree: std({ color: '#8fb05a', roughness: 1, flatShading: true }),
+    lavande: std({ color: '#8b80ad', roughness: 1, flatShading: true }),
+    lavandeLeaf: std({ color: '#8f9c86', roughness: 1, flatShading: true }),
+    cornStem: std({ color: '#a2342a', roughness: 0.9 }),
+    cornLeaf: std({ color: '#6e9448', roughness: 1, flatShading: true }),
+    thuya: std({ color: '#3a5f31', roughness: 1, flatShading: true }),
+    graminee: std({ color: '#c3b47c', roughness: 1, flatShading: true }),
+  },
   person: std({ color: '#5d6770', roughness: 0.85 }),
 };
 
@@ -306,6 +320,10 @@ function viewPose(name) {
     case 'E': return at(96, 10, 25 * d);
     case 'S': return at(192, 10, 25 * d);
     case 'W': return at(262, 10, 25 * d);
+    case 'old': {
+      const [x, z] = w2(22.5, 14);
+      return at(135, 28, 24 * d, new THREE.Vector3(x, 2.5, z));
+    }
     case 'street': {
       const [x, z] = w2(3.2, 21.5);
       return { pos: new THREE.Vector3(x, 1.65, z), tgt: new THREE.Vector3(c.x - 1, 3.2, c.z - 1) };
@@ -336,7 +354,6 @@ $('autumn').addEventListener('change', (e) => {
   const pal = e.target.checked ? FOLIAGE.autumn : FOLIAGE.summer;
   M.foliage.forEach((m, i) => m.color.set(pal[i]));
   M.farFoliage.color.set(e.target.checked ? '#8f7a3a' : '#4c6b3a');
-  M.hedge.color.set(e.target.checked ? '#c8b98a' : '#ffffff');
 });
 $('hour').addEventListener('input', updateSun);
 $('month').addEventListener('change', updateSun);
