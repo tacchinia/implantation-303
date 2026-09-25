@@ -232,7 +232,6 @@ export function buildHouse(M) {
   const pipe = (u, v, h) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, h, 8), M.metal); c.position.set(u, h / 2, v); c.castShadow = true; return c; };
   g.add(pipe(W + 0.08, LEN - 0.25, he(W)));
   g.add(pipe(W + 0.08, 1.25, he(W)));
-  g.add(pipe(-0.08, LEN - 0.25, L1 - 0.2));
 
   // auvent tuilé au-dessus de l'entrée du couvert : adossé au pignon nord de l'étage,
   // le bas de la pente repose sur la dalle (sol de l'étage), prolongée jusqu'à v = -0,4
