@@ -238,9 +238,15 @@ export function buildSite(M, scene) {
     t.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     groups.neighbors.add(t);
   }
-  // côté est de la maison 169 : entièrement pavé jusqu'à la limite de propriété
+  // abords pavés de la maison 169 : tout le côté est jusqu'à la limite, et au sud, de la rue
+  // jusqu'à la limite est. Au sud, le bord suit l'alignement des places P5/P6 (largeur variable
+  // selon les décrochements de la façade) ; le dessous de la terrasse est pavé.
   {
-    const pave = new THREE.Mesh(flatPoly([[22.852, 5.309], [27.884, 5.227], [26.605, 16.53], [22.594, 16.531]], 0.03), M.pavedEast);
+    const pave = new THREE.Mesh(flatPoly([
+      [22.852, 5.309], [27.884, 5.227], [26.24, 19.58], [9.78, 18.73],             // est, limite est, alignement P5/P6
+      [10.08, 16.2], [10.756, 16.177], [15.251, 16.386], [15.251, 17.442],          // façade sud (décrochements)
+      [19.712, 17.543], [19.761, 16.475], [22.594, 16.531],
+    ], 0.03), M.pavedEast);
     pave.receiveShadow = true; root.add(pave);
   }
 
@@ -292,6 +298,12 @@ export function buildSite(M, scene) {
   place('birch', 21.4, 45.8, 8);          // bouleau, coin sud-est
   place('shrub', 16.5, 47.4, 1.4);
   place('shrub', 12.5, 48.6, 1.2);
+  // lignée d'arbres au nord de l'accès : limite entre ancienne et nouvelle maison
+  for (let i = 0; i < 4; i++) place('deciduous', 16.4 + i * 2.1, 23.45 + i * 0.11, 5.2 + r() * 0.8);
+  // petits arbres dans la pelouse au sud de la maison 169
+  place('deciduous', 18.0, 21.3, 3.6);
+  place('birch', 24.3, 21.0, 4.2);
+  place('deciduous', 9.75, 23.2, 3.2);
   // semis aléatoire autour de la parcelle
   let n = 0, guard = 0;
   while (n < 24 && guard++ < 4000) {

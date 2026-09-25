@@ -22,8 +22,9 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
 - rue de la Mairie, accès et places en **pavés gazon**, limites de parcelle, voisins
   schématiques ; muret de 30 × 15 cm en limite sud ; petits arbustes d'essences variées
   le long de la rue (sauf l'accès de 5 m) ; balcon/coursive en dalle béton ; terrasse
-  de l'ancienne maison en hauteur (1er étage, deux piliers bois) ; côté est de
-  l'ancienne maison pavé jusqu'à la limite ; quelques arbres aux alentours ;
+  de l'ancienne maison en hauteur (1er étage, deux piliers bois) ; côté est et côté sud de
+  l'ancienne maison pavés (jusqu'à la limite est et à l'alignement des places P5/P6,
+  dessous de la terrasse compris) ; lignée d'arbres au nord de l'accès ; quelques arbres aux alentours ;
 - soleil réglable (heure, mois) avec ombres portées, points de vue prédéfinis, boussole.
 
 Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.html`.

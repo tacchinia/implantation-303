@@ -321,8 +321,8 @@ function viewPose(name) {
     case 'S': return at(192, 10, 25 * d);
     case 'W': return at(262, 10, 25 * d);
     case 'old': {
-      const [x, z] = w2(22.5, 14);
-      return at(135, 28, 24 * d, new THREE.Vector3(x, 2.5, z));
+      const [x, z] = w2(18.5, 16.5);
+      return at(200, 50, 42 * d, new THREE.Vector3(x, 2.0, z));
     }
     case 'street': {
       const [x, z] = w2(3.2, 21.5);
