@@ -155,7 +155,7 @@ export function buildHouse(M) {
   }
 
   // dalle au-dessus du couvert, rive de dalle
-  g.add(boxB(0, W, L1 - 0.3, L1, 1.1, 4.8, M.render));
+  g.add(boxB(0, W, L1 - 0.3, L1, -0.4, 4.8, M.render));
   // poteaux du couvert
   g.add(boxB(0.02, 0.24, 0, L1 - 0.3, 1.12, 1.34, M.render));
   g.add(boxB(W - 0.24, W - 0.02, 0, L1 - 0.3, 1.12, 1.34, M.render));
@@ -228,17 +228,21 @@ export function buildHouse(M) {
   g.add(pipe(W + 0.08, 1.25, he(W)));
   g.add(pipe(-0.08, LEN - 0.25, L1 - 0.2));
 
-  // auvent tuilé au-dessus de l'entrée du couvert
+  // auvent tuilé au-dessus de l'entrée du couvert : adossé au pignon nord de l'étage,
+  // le bas de la pente repose sur la dalle (sol de l'étage), prolongée jusqu'à v = -0,4
   {
-    const dv = 1.6, dh = 0.55, len = Math.hypot(dv, dh), a = Math.atan2(dh, dv);
-    const m = new THREE.Mesh(boxUV(new THREE.BoxGeometry(len, 0.18, 9.6), len, 0.18, 9.6), roofMats);
+    const vLow = -0.4, dv = 1.1 - vLow, dh = dv * P, len = Math.hypot(dv, dh), a = Math.atan2(dh, dv), t = 0.18;
+    const m = new THREE.Mesh(boxUV(new THREE.BoxGeometry(len, t, W), len, t, W), roofMats);
     m.rotation.set(0, Math.PI / 2, -a, 'YZX');
-    m.position.set(W / 2, 3.95 - dh / 2 + 0.09, 1.1 - dv / 2);
+    m.position.set(W / 2, L1 + dh / 2 + (t / 2) * Math.cos(a), 1.1 - dv / 2 - (t / 2) * Math.sin(a));
     m.castShadow = m.receiveShadow = true;
     g.add(m);
-    g.add(boxB(-0.3, W + 0.3, 3.2, 3.4, -0.5, -0.38, M.fascia));
-    for (const u of [0.1, W / 2, W - 0.1]) {
-      const s = box(0.1, 0.12, 1.5, M.soffit); s.position.set(u, 3.62, 0.35); s.rotation.x = -a; g.add(s);
+    // joues triangulaires fermant l'auvent aux deux extrémités
+    const tri = new THREE.Shape([new THREE.Vector2(1.1, L1), new THREE.Vector2(vLow, L1), new THREE.Vector2(1.1, L1 + dh)]);
+    for (const u of [0.05, W]) {
+      const jg = new THREE.ExtrudeGeometry(tri, { depth: 0.05, bevelEnabled: false });
+      jg.rotateY(-Math.PI / 2); jg.translate(u, 0, 0);
+      const j = new THREE.Mesh(jg, M.fascia); j.castShadow = true; g.add(j);
     }
   }
 
