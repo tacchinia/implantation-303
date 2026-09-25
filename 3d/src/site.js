@@ -209,6 +209,13 @@ export function buildSite(M, scene) {
   lbl.rotation.set(-Math.PI / 2, 0, Math.PI / 2 - 3.5 * D2R);
   const [lx, lz] = w2(4.6, 40); lbl.position.set(lx, 0.03, lz); root.add(lbl);
 
+  // les pavés gazon s'arrêtent à la limite est de la parcelle (segment E2–E3 longeant l'accès)
+  {
+    const [ax, az] = w2(25.01, 22.299), [bx, bz] = w2(23.281, 36.161), [ix, iz] = w2(15, 30);
+    const n = new THREE.Vector3(bz - az, 0, -(bx - ax)).normalize();
+    if (n.x * (ix - ax) + n.z * (iz - az) < 0) n.negate();          // normale vers l'intérieur
+    M.grassPaver.clippingPlanes = [new THREE.Plane(n, -(n.x * ax + n.z * az))];
+  }
   // accès en pavés gazon + places de parc
   const acc = new THREE.Mesh(ribbon(SCENARIO.route.pts, SCENARIO.route.width, 0.02), M.grassPaver);
   acc.receiveShadow = true; root.add(acc);

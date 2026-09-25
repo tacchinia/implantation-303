@@ -15,8 +15,8 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
 - volumes relevés sur les plans et élévations (sans cotes) et calés sur l'implantation
   ci-dessous : emprise 9,0 × 15,3 m, 3 places couvertes sous l'étage, escalier extérieur,
   coursive et terrasse à l'ouest, toit à deux pans décalés à 35 %, auvent tuilé au nord ;
-- **bardage mélèze en lames verticales** activable par façade (nord / est / sud / ouest ×
-  rez / étage), en cliquant directement sur un mur ou via la grille ; largeur de lame, pose
+- **bardage mélèze en lames verticales** activable par façade (nord / est / sud / ouest gauche
+  jusqu'au balcon / ouest droite côté balcon, × rez / étage), en cliquant directement sur un mur ou via la grille ; largeur de lame, pose
   jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
 - teintes d'enduit, de toiture et de menuiseries ;
 - rue de la Mairie, accès et places en **pavés gazon**, limites de parcelle, voisins

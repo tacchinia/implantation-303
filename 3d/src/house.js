@@ -57,11 +57,13 @@ function wallMatrix(dir, face) {
   return m;
 }
 
-function wallShape(outline, holes, extend = 0) {
+// extend : débord du bardage aux angles ; noExt : extrémités ('lo'/'hi') sans débord (joint entre deux parties)
+function wallShape(outline, holes, extend = 0, noExt = []) {
   let pts = outline;
   if (extend) {
     const sMin = Math.min(...outline.map((p) => p[0])), sMax = Math.max(...outline.map((p) => p[0]));
-    pts = outline.map(([s, h]) => [s === sMin ? s - extend : s === sMax ? s + extend : s, h]);
+    const lo = noExt.includes('lo') ? 0 : extend, hi = noExt.includes('hi') ? 0 : extend;
+    pts = outline.map(([s, h]) => [s === sMin ? s - lo : s === sMax ? s + hi : s, h]);
   }
   const shape = new THREE.Shape(pts.map(([s, h]) => new THREE.Vector2(s, h)));
   const hMin = Math.min(...outline.map((p) => p[1]));
@@ -89,8 +91,11 @@ export const WALLS = [
     holes: [{ s: [1.4, 4.17], h: [0, 2.1], t: 'slide' }, { s: [5.97, 7.76], h: [0, 2.1], t: 'slide' }] },
   { key: 'N_rdc', dir: 'N', face: 4.8, outline: rect(0, W, 0, L1),
     holes: [{ s: [6.1, 6.95], h: [0, 2.1], t: 'door' }, { s: [7.5, 8.1], h: [1.5, 2.1], t: 'vent' }] },
-  { key: 'W_rdc', dir: 'W', face: 0, outline: rect(4.8 + T, LEN - T, 0, L1),
-    holes: [{ s: [6.2, 6.75], h: [1.35, 1.95], t: 'vent' }, { s: [7.73, 8.65], h: [0, 2.15], t: 'door' },
+  // façade ouest du rez, en deux parties : gauche (nord) jusqu'au décrochement du balcon (v = 7,7), droite (sud)
+  { key: 'W_rdc_N', dir: 'W', face: 0, outline: rect(4.8 + T, 7.7, 0, L1), noExt: ['hi'],
+    holes: [{ s: [6.2, 6.75], h: [1.35, 1.95], t: 'vent' }] },
+  { key: 'W_rdc_S', dir: 'W', face: 0, outline: rect(7.7, LEN - T, 0, L1), noExt: ['lo'],
+    holes: [{ s: [7.73, 8.65], h: [0, 2.15], t: 'door' },
       { s: [9.8, 10.8], h: [1.2, 2.15], t: 'win' }, { s: [12.5, 13.6], h: [0, 2.15], t: 'slide' }] },
   { key: 'E_rdc', dir: 'E', face: W, outline: rect(T, LEN - 4.8 - T, 0, L1),
     holes: [{ s: [4.3, 5.0], h: [1.3, 2.2], t: 'win' }, { s: [6.8, 7.9], h: [1.1, 2.2], t: 'win' }] },
@@ -104,10 +109,10 @@ export const WALLS = [
   { key: 'E_up', dir: 'E', face: W, outline: rect(T, LEN - 1.1 - T, L1, he(W)),
     holes: [{ s: [0.94, 2.23], h: [3.95, 5.2], t: 'win' }, { s: [3.45, 4.75], h: [3.95, 5.2], t: 'win' },
       { s: [6.16, 8.04], h: [3.95, 5.2], t: 'win' }, { s: [9.55, 10.4], h: [3.95, 5.2], t: 'win' }] },
-  { key: 'W_up', dir: 'W', face: 0, outline: [[1.1 + T, L1], [7.7 - T, L1], [7.7 - T, hw(0)], [1.1 + T, hw(0)]],
+  { key: 'W_up_N', dir: 'W', face: 0, outline: [[1.1 + T, L1], [7.7 - T, L1], [7.7 - T, hw(0)], [1.1 + T, hw(0)]],
     holes: [{ s: [3.0, 4.2], h: [3.9, 5.1], t: 'win' }, { s: [4.6, 5.9], h: [3.9, 5.1], t: 'win' }] },
-  { key: 'W_up', dir: 'S', face: 7.7, outline: [[0, L1], [2.07, L1], [2.07, hw(2.07)], [0, hw(0)]], holes: [] },
-  { key: 'W_up', dir: 'W', face: 2.07, outline: [[7.7, L1], [LEN - T, L1], [LEN - T, hw(2.07)], [7.7, hw(2.07)]],
+  { key: 'W_up_S', dir: 'S', face: 7.7, outline: [[0, L1], [2.07, L1], [2.07, hw(2.07)], [0, hw(0)]], holes: [] },
+  { key: 'W_up_S', dir: 'W', face: 2.07, outline: [[7.7, L1], [LEN - T, L1], [LEN - T, hw(2.07)], [7.7, hw(2.07)]],
     holes: [{ s: [8.45, 9.4], h: [L1, 5.0], t: 'door' }, { s: [10.8, 13.85], h: [L1, 5.05], t: 'slide' }] },
 ];
 
@@ -115,11 +120,13 @@ export const FACADES = [
   { id: 'N', name: 'Nord', sub: 'couvert / pignon', keys: ['N_rdc', 'N_up'] },
   { id: 'E', name: 'Est', sub: 'longue façade', keys: ['E_rdc', 'E_up'] },
   { id: 'S', name: 'Sud', sub: 'jardin', keys: ['S_rdc', 'S_up'] },
-  { id: 'W', name: 'Ouest', sub: 'escalier, terrasse', keys: ['W_rdc', 'W_up'] },
+  { id: 'Wn', name: 'Ouest gauche', sub: 'nord, jusqu’au balcon', keys: ['W_rdc_N', 'W_up_N'] },
+  { id: 'Ws', name: 'Ouest droite', sub: 'sud, côté balcon', keys: ['W_rdc_S', 'W_up_S'] },
 ];
 export const KEY_LABEL = {
   N_rdc: 'Nord · fond du couvert', N_up: 'Nord · étage (pignon)', E_rdc: 'Est · rez', E_up: 'Est · étage',
-  S_rdc: 'Sud · rez', S_up: 'Sud · étage (pignon)', W_rdc: 'Ouest · rez', W_up: 'Ouest · étage et terrasse',
+  S_rdc: 'Sud · rez', S_up: 'Sud · étage (pignon)', W_rdc_N: 'Ouest gauche · rez (jusqu’au balcon)', W_up_N: 'Ouest gauche · étage (jusqu’au balcon)',
+  W_rdc_S: 'Ouest droite · rez (sous le balcon)', W_up_S: 'Ouest droite · étage (côté balcon)',
 };
 
 // ─── construction ─────────────────────────────────────────────────────────
@@ -139,7 +146,7 @@ export function buildHouse(M) {
     mesh.userData.key = w.key;
     g.add(mesh); pickables.push(mesh);
     // bardage mélèze (même découpe, posé devant le mur)
-    const cg = new THREE.ExtrudeGeometry(wallShape(w.outline, w.holes, CLAD), { depth: CLAD, bevelEnabled: false });
+    const cg = new THREE.ExtrudeGeometry(wallShape(w.outline, w.holes, CLAD, w.noExt), { depth: CLAD, bevelEnabled: false });
     cg.applyMatrix4(mtx);
     const cm = new THREE.Mesh(cg, M.larch);
     cm.castShadow = cm.receiveShadow = true;
