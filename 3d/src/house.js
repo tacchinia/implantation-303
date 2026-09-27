@@ -111,7 +111,7 @@ export const WALLS = [
       { s: [6.16, 8.04], h: [3.95, 5.2], t: 'win' }, { s: [9.55, 10.4], h: [3.95, 5.2], t: 'win' }] },
   { key: 'W_up_N', dir: 'W', face: 0, outline: [[1.1 + T, L1], [7.7 - T, L1], [7.7 - T, hw(0)], [1.1 + T, hw(0)]],
     holes: [{ s: [3.0, 4.2], h: [3.9, 5.1], t: 'win' }, { s: [4.6, 5.9], h: [3.9, 5.1], t: 'win' }] },
-  { key: 'W_up_S', dir: 'S', face: 7.7, outline: [[0, L1], [2.07, L1], [2.07, hw(2.07)], [0, hw(0)]], holes: [] },
+  { key: 'W_up_R', dir: 'S', face: 7.7, outline: [[0, L1], [2.07, L1], [2.07, hw(2.07)], [0, hw(0)]], holes: [] },
   { key: 'W_up_S', dir: 'W', face: 2.07, outline: [[7.7, L1], [LEN - T, L1], [LEN - T, hw(2.07)], [7.7, hw(2.07)]],
     holes: [{ s: [8.45, 9.4], h: [L1, 5.0], t: 'door' }, { s: [10.8, 13.85], h: [L1, 5.05], t: 'slide' }] },
 ];
@@ -122,11 +122,13 @@ export const FACADES = [
   { id: 'S', name: 'Sud', sub: 'jardin', keys: ['S_rdc', 'S_up'] },
   { id: 'Wn', name: 'Ouest gauche', sub: 'nord, jusqu’au balcon', keys: ['W_rdc_N', 'W_up_N'] },
   { id: 'Ws', name: 'Ouest droite', sub: 'sud, côté balcon', keys: ['W_rdc_S', 'W_up_S'] },
+  { id: 'Wr', name: 'Ouest décrochement', sub: 'retour face au sud', keys: [null, 'W_up_R'] },
 ];
 export const KEY_LABEL = {
   N_rdc: 'Nord · fond du couvert', N_up: 'Nord · étage (pignon)', E_rdc: 'Est · rez', E_up: 'Est · étage',
   S_rdc: 'Sud · rez', S_up: 'Sud · étage (pignon)', W_rdc_N: 'Ouest gauche · rez (jusqu’au balcon)', W_up_N: 'Ouest gauche · étage (jusqu’au balcon)',
   W_rdc_S: 'Ouest droite · rez (sous le balcon)', W_up_S: 'Ouest droite · étage (côté balcon)',
+  W_up_R: 'Ouest · décrochement face au sud (étage)',
 };
 
 // ─── construction ─────────────────────────────────────────────────────────

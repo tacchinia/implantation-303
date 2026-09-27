@@ -16,10 +16,11 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
   ci-dessous : emprise 9,0 × 15,3 m, 3 places couvertes sous l'étage, escalier extérieur,
   coursive et terrasse à l'ouest, toit à deux pans décalés à 35 %, auvent tuilé au nord ;
 - **bardage mélèze en lames verticales** activable par façade (nord / est / sud / ouest gauche
-  jusqu'au balcon / ouest droite côté balcon, × rez / étage), en cliquant directement sur un mur ou via la grille ; largeur de lame, pose
+  jusqu'au balcon / ouest droite côté balcon, × rez / étage, plus le décrochement ouest
+  face au sud ; par défaut : mélèze sur l'étage ouest droite uniquement), en cliquant directement sur un mur ou via la grille ; largeur de lame, pose
   jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
 - teintes d'enduit, de toiture et de menuiseries ;
-- rue de la Mairie, accès et places en **pavés gazon**, limites de parcelle, voisins
+- rue de la Mairie, accès et place P4 en **pavés gazon**, places P5/P6 pavées, limites de parcelle, voisins
   schématiques ; muret de 30 × 15 cm en limite sud ; petits arbustes d'essences variées
   le long de la rue (sauf l'accès de 5 m) ; balcon/coursive en dalle béton ; terrasse
   de l'ancienne maison en hauteur (1er étage, deux piliers bois) ; côté est et côté sud de

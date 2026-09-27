@@ -220,7 +220,7 @@ export function buildSite(M, scene) {
   const acc = new THREE.Mesh(ribbon(SCENARIO.route.pts, SCENARIO.route.width, 0.02), M.grassPaver);
   acc.receiveShadow = true; root.add(acc);
   for (const p of SCENARIO.parkings) {
-    const m = box(p.w, 0.05, p.h, M.grassPaver);
+    const m = box(p.w, 0.05, p.h, p.paved ? M.pavedEast : M.grassPaver);
     const [x, z] = w2(p.x, p.y); m.position.set(x, 0.0, z); m.rotation.y = -p.rot * D2R; m.castShadow = false;
     root.add(m);
     const t = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: labelTexture(p.label, { w: 256, h: 128, font: '700 90px Archivo, Arial, sans-serif', color: 'rgba(255,255,255,.8)' }), transparent: true, depthWrite: false }));

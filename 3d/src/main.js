@@ -192,7 +192,7 @@ function houseCenter() {
 house.group.updateMatrixWorld(true);
 
 // ─── bardage : état et interactions ──────────────────────────────────────
-const cladState = { N_rdc: false, N_up: false, E_rdc: false, E_up: true, S_rdc: false, S_up: true, W_rdc_N: false, W_up_N: true, W_rdc_S: false, W_up_S: true };
+const cladState = { N_rdc: false, N_up: false, E_rdc: false, E_up: false, S_rdc: false, S_up: false, W_rdc_N: false, W_up_N: false, W_rdc_S: false, W_up_S: true, W_up_R: false };
 const facadesEl = $('facades');
 const toggles = {};
 for (const f of FACADES) {
@@ -200,6 +200,7 @@ for (const f of FACADES) {
   rh.innerHTML = `${f.name}<small>${f.sub}</small>`;
   facadesEl.appendChild(rh);
   for (const key of f.keys) {
+    if (!key) { facadesEl.appendChild(document.createElement('span')); continue; }
     const b = document.createElement('button');
     b.className = 'tog'; b.type = 'button';
     b.innerHTML = '<span class="sw"></span><span class="lbl">enduit</span>';
@@ -223,8 +224,8 @@ function applyClad() {
 }
 const PRESETS = {
   none: () => ({}),
-  up: () => ({ N_up: true, E_up: true, S_up: true, W_up_N: true, W_up_S: true }),
-  sw: () => ({ S_rdc: true, S_up: true, W_rdc_N: true, W_up_N: true, W_rdc_S: true, W_up_S: true }),
+  up: () => ({ N_up: true, E_up: true, S_up: true, W_up_N: true, W_up_S: true, W_up_R: true }),
+  sw: () => ({ S_rdc: true, S_up: true, W_rdc_N: true, W_up_N: true, W_rdc_S: true, W_up_S: true, W_up_R: true }),
   all: () => Object.fromEntries(Object.keys(cladState).map((k) => [k, true])),
 };
 document.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => {
