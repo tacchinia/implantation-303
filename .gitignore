@@ -4,3 +4,6 @@ CLAUDE.md
 # Système
 .DS_Store
 Thumbs.db
+
+# Build de la maquette 3D
+3d/node_modules/

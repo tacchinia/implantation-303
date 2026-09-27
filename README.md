@@ -5,7 +5,32 @@ Outil interactif **autonome** (un seul fichier HTML, sans dépendance ni serveur
 
 👉 **[Ouvrir l'outil](implantation-parcelle-303.html)**
 
-## Ce que fait l'outil
+👉 **[Maquette 3D de la maison](maison-303-3d.html)** — visite libre du futur bâtiment et essai
+du bardage mélèze façade par façade.
+
+## Maquette 3D (`maison-303-3d.html`)
+
+Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
+
+- volumes relevés sur les plans et élévations (sans cotes) et calés sur l'implantation
+  ci-dessous : emprise 9,0 × 15,3 m, 3 places couvertes sous l'étage, escalier extérieur,
+  coursive et terrasse à l'ouest, toit à deux pans décalés à 35 %, auvent tuilé au nord ;
+- **bardage mélèze en lames verticales** activable par façade (nord / est / sud / ouest gauche
+  jusqu'au balcon / ouest droite côté balcon, × rez / étage, plus le décrochement ouest
+  face au sud ; par défaut : mélèze sur l'étage ouest droite uniquement), en cliquant directement sur un mur ou via la grille ; largeur de lame, pose
+  jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
+- teintes d'enduit, de toiture et de menuiseries ;
+- rue de la Mairie, accès et place P4 en **pavés gazon**, places P5/P6 pavées, limites de parcelle, voisins
+  schématiques ; muret de 30 × 15 cm en limite sud ; petits arbustes d'essences variées
+  le long de la rue (sauf l'accès de 5 m) ; balcon/coursive en dalle béton ; terrasse
+  de l'ancienne maison en hauteur (1er étage, deux piliers bois) ; côté est et côté sud de
+  l'ancienne maison pavés (jusqu'à la limite est et à l'alignement des places P5/P6,
+  dessous de la terrasse compris) ; lignée d'arbres au nord de l'accès ; quelques arbres aux alentours ;
+- soleil réglable (heure, mois) avec ombres portées, points de vue prédéfinis, boussole.
+
+Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.html`.
+
+## Ce que fait l'outil d'implantation
 
 - Fond cadastral géoréférencé embarqué (échelle calibrée 0.0373336 m/px, plan ≈ 1:500).
 - Zone constructible et bande de retrait de 3 m (limites sud / ouest / est) précalculées.
