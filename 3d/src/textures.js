@@ -271,6 +271,82 @@ export function updateLarch(mat, opts) {
   mat.needsUpdate = true;
 }
 
+
+// Parements de pierre. kind : 'ashlar' (pierre de taille en assises), 'rubble' (moellons irréguliers),
+// 'ledger' (plaquettes de parement empilées). Retourne { map, bump } sur 2,4 × 2,4 m.
+export const STONES = {
+  limestone: { name: 'Calcaire', kind: 'ashlar', tone: '#d8cdb6', css: '#d8cdb6', bump: 2 },
+  fieldstone: { name: 'Moellons', kind: 'rubble', tone: '#a89a85', css: '#a89a85', bump: 3.5 },
+  schist: { name: 'Schiste', kind: 'ledger', tone: '#6f737a', css: '#6f737a', bump: 3 },
+  sandstone: { name: 'Grès', kind: 'ashlar', tone: '#c4977c', css: '#c4977c', bump: 2, seed: 7 },
+};
+function shade(base, k) {
+  return `rgb(${Math.min(255, base.r * 255 * k) | 0},${Math.min(255, base.g * 255 * k) | 0},${Math.min(255, base.b * 255 * k) | 0})`;
+}
+export function stoneTextures(id) {
+  const st = STONES[id], r = rng(200 + (st.seed || 0) + id.length * 13), S = 1024, SIZE = 2.4, pxm = S / SIZE;
+  const [c, x] = canvas(S, S), [b, bx] = canvas(S, S);
+  const base = new THREE.Color(st.tone);
+  x.fillStyle = '#4a463f'; x.fillRect(0, 0, S, S);           // joint
+  bx.fillStyle = '#000'; bx.fillRect(0, 0, S, S);
+  const block = (x0, y0, w, h, rad, k) => {
+    const rr = (cx) => { cx.beginPath(); cx.roundRect(x0, y0, w, h, rad); };
+    rr(x); x.fillStyle = shade(base, k); x.fill();
+    rr(bx); bx.fillStyle = '#a0a0a0'; bx.fill();
+    // veinage / taches propres à chaque pierre
+    x.save(); rr(x); x.clip();
+    for (let i = 0; i < 5; i++) {
+      x.fillStyle = r() < 0.5 ? 'rgba(0,0,0,.05)' : 'rgba(255,255,255,.06)';
+      x.beginPath(); x.ellipse(x0 + r() * w, y0 + r() * h, w * (0.1 + r() * 0.3), h * (0.1 + r() * 0.3), r() * 3, 0, 7); x.fill();
+    }
+    x.restore();
+  };
+  if (st.kind === 'ashlar') {
+    const bh = 0.3, bwBase = 0.6, rows = Math.round(SIZE / bh), gap = 0.008 * pxm;
+    for (let j = 0; j < rows; j++) {
+      let u = -r() * bwBase;
+      while (u < SIZE) {
+        const w = bwBase * (0.75 + r() * 0.6);
+        block(u * pxm + gap, j * bh * pxm + gap, w * pxm - 2 * gap, bh * pxm - 2 * gap, 2, 0.88 + r() * 0.24);
+        block((u + SIZE) * pxm + gap, j * bh * pxm + gap, w * pxm - 2 * gap, bh * pxm - 2 * gap, 2, 0.88 + r() * 0.24); // raccord
+        u += w;
+      }
+    }
+  } else if (st.kind === 'ledger') {
+    let y = 0;
+    while (y < SIZE) {
+      const h = 0.07 + r() * 0.07; let u = -r() * 0.3;
+      while (u < SIZE) {
+        const w = 0.15 + r() * 0.35;
+        const g = 0.004 * pxm;
+        block(u * pxm + g, y * pxm + g, w * pxm - 2 * g, h * pxm - 2 * g, 3, 0.8 + r() * 0.4);
+        block((u + SIZE) * pxm + g, y * pxm + g, w * pxm - 2 * g, h * pxm - 2 * g, 3, 0.8 + r() * 0.4);
+        u += w;
+      }
+      y += h;
+    }
+  } else {
+    // moellons : pierres de tailles variées en assises approximatives
+    let y = 0;
+    while (y < SIZE) {
+      const h = 0.13 + r() * 0.12; let u = -r() * 0.3;
+      while (u < SIZE) {
+        const w = 0.18 + r() * 0.3, g = 0.012 * pxm;
+        const hh = h * (0.85 + r() * 0.25);
+        for (const o of [0, SIZE]) block((u + o) * pxm + g, y * pxm + g, w * pxm - 2 * g, hh * pxm - 2 * g, 10 + r() * 14, 0.75 + r() * 0.5);
+        u += w;
+      }
+      y += h;
+    }
+  }
+  noise(x, S, S, 22, r);
+  // relief : joints creusés, grain
+  const bimg = bx.getImageData(0, 0, S, S), d = bimg.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (r() - 0.5) * 30; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  bx.putImageData(bimg, 0, 0);
+  return { map: toTex(c, SIZE, SIZE), bump: toTex(b, SIZE, SIZE, false), bumpScale: st.bump };
+}
+
 // Étiquette texte posée au sol
 export function labelTexture(text, { w = 1024, h = 128, font = '600 72px Archivo, Arial, sans-serif', color = 'rgba(255,255,255,.85)' } = {}) {
   const [c, x] = canvas(w, h);

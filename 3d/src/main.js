@@ -46,6 +46,7 @@ const deckTex = TX.larchTextures({ boardW: 0.14, gap: 0.008, age: 0.35, boards: 
 const M = {
   render: std({ map: TX.renderTexture(), color: '#efebe3', roughness: 0.95 }),
   larch: std({ map: larchTex.map, bumpMap: larchTex.bump, bumpScale: 2.5, roughness: 0.82 }),
+  ...Object.fromEntries(Object.keys(TX.STONES).map((id) => { const s = TX.stoneTextures(id); return ['stone_' + id, std({ map: s.map, bumpMap: s.bump, bumpScale: s.bumpScale, roughness: 0.92 })]; })),
   deck: std({ map: deckTex.map, bumpMap: deckTex.bump, bumpScale: 1.5, roughness: 0.85 }),
   roof: std({ map: TX.roofTexture(), color: '#4a4c50', roughness: 0.8 }),
   fascia: std({ color: '#3a302a', roughness: 0.8 }),
@@ -191,46 +192,62 @@ function houseCenter() {
 }
 house.group.updateMatrixWorld(true);
 
-// ─── bardage : état et interactions ──────────────────────────────────────
-const cladState = { N_rdc: false, N_up: false, E_rdc: false, E_up: false, S_rdc: false, S_up: false, W_rdc_N: false, W_up_N: false, W_rdc_S: false, W_up_S: true, W_up_R: false };
+// ─── parements : état et interactions ────────────────────────────────────
+// Chaque pan de façade a une finition : 'render' (enduit), 'larch' (mélèze) ou une pierre (TX.STONES).
+const FINISHES = [
+  { id: 'render', name: 'Enduit' },
+  { id: 'larch', name: 'Mélèze' },
+  ...Object.entries(TX.STONES).map(([id, s]) => ({ id, name: s.name })),
+];
+const FIN_NAME = Object.fromEntries(FINISHES.map((f) => [f.id, f.name]));
+const finMat = (id) => (id === 'larch' ? M.larch : M['stone_' + id]);
+const cladState = Object.fromEntries(Object.values(FACADES).flatMap((f) => f.keys).filter(Boolean).map((k) => [k, k === 'W_up_S' ? 'larch' : 'render']));
 const facadesEl = $('facades');
 const toggles = {};
+const optionsHtml = FINISHES.map((f) => `<option value="${f.id}">${f.name}</option>`).join('');
 for (const f of FACADES) {
   const rh = document.createElement('div'); rh.className = 'rowh';
   rh.innerHTML = `${f.name}<small>${f.sub}</small>`;
   facadesEl.appendChild(rh);
   for (const key of f.keys) {
     if (!key) { facadesEl.appendChild(document.createElement('span')); continue; }
-    const b = document.createElement('button');
-    b.className = 'tog'; b.type = 'button';
-    b.innerHTML = '<span class="sw"></span><span class="lbl">enduit</span>';
-    b.setAttribute('aria-label', `Bardage ${KEY_LABEL[key]}`);
-    b.addEventListener('click', () => setClad(key, !cladState[key]));
-    facadesEl.appendChild(b); toggles[key] = b;
+    const s = document.createElement('select');
+    s.className = 'fin'; s.innerHTML = optionsHtml;
+    s.setAttribute('aria-label', `Parement ${KEY_LABEL[key]}`);
+    s.addEventListener('change', () => setClad(key, s.value));
+    facadesEl.appendChild(s); toggles[key] = s;
   }
 }
-function setClad(key, on) { cladState[key] = on; applyClad(); }
+const allSel = $('finAll');
+allSel.innerHTML = '<option value="">Toutes les façades…</option>' + optionsHtml;
+allSel.addEventListener('change', () => {
+  if (!allSel.value) return;
+  for (const k in cladState) cladState[k] = allSel.value;
+  allSel.value = ''; applyClad();
+});
+function setClad(key, fin) { cladState[key] = fin; applyClad(); }
 function applyClad() {
-  let area = 0;
+  const area = {};
   for (const key in cladState) {
-    const on = cladState[key];
-    (house.clad[key] || []).forEach((m) => { m.visible = on; });
-    const b = toggles[key];
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    b.querySelector('.lbl').textContent = on ? 'mélèze' : 'enduit';
-    if (on) area += house.area[key];
+    const fin = cladState[key];
+    (house.clad[key] || []).forEach((m) => { m.visible = fin !== 'render'; if (fin !== 'render') m.material = finMat(fin); });
+    toggles[key].value = fin;
+    toggles[key].dataset.fin = fin;
+    if (fin !== 'render') area[fin] = (area[fin] || 0) + house.area[key];
   }
-  $('areaOut').textContent = `≈ ${Math.round(area)} m² bardés`;
+  const parts = Object.entries(area).map(([f, a]) => `${Math.round(a)} m² ${FIN_NAME[f].toLowerCase()}`);
+  $('areaOut').textContent = parts.length ? `≈ ${parts.join(' · ')}` : 'enduit seul';
 }
 const PRESETS = {
   none: () => ({}),
-  up: () => ({ N_up: true, E_up: true, S_up: true, W_up_N: true, W_up_S: true, W_up_R: true }),
-  sw: () => ({ S_rdc: true, S_up: true, W_rdc_N: true, W_up_N: true, W_rdc_S: true, W_up_S: true, W_up_R: true }),
-  all: () => Object.fromEntries(Object.keys(cladState).map((k) => [k, true])),
+  up: () => ({ N_up: 'larch', E_up: 'larch', S_up: 'larch', W_up_N: 'larch', W_up_S: 'larch', W_up_R: 'larch' }),
+  sw: () => ({ S_rdc: 'larch', S_up: 'larch', W_rdc_N: 'larch', W_up_N: 'larch', W_rdc_S: 'larch', W_up_S: 'larch', W_up_R: 'larch' }),
+  all: () => Object.fromEntries(Object.keys(cladState).map((k) => [k, 'larch'])),
+  mix: () => Object.fromEntries(Object.keys(cladState).map((k) => [k, k.includes('_rdc') ? 'limestone' : 'larch'])),
 };
 document.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => {
   const p = PRESETS[b.dataset.preset]();
-  for (const k in cladState) cladState[k] = !!p[k];
+  for (const k in cladState) cladState[k] = p[k] || 'render';
   applyClad();
 }));
 applyClad();
@@ -291,7 +308,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) { down = null; return; }
   down = null;
   const key = pick(e);
-  if (key) { setClad(key, !cladState[key]); showTip(e, key); }
+  if (key) { setClad(key, nextFinish(cladState[key])); showTip(e, key); }
 });
 renderer.domElement.addEventListener('pointermove', (e) => {
   if (e.pointerType !== 'mouse' || e.buttons) { tip.hidden = true; return; }
@@ -301,8 +318,9 @@ renderer.domElement.addEventListener('pointermove', (e) => {
   if (key) showTip(e, key); else tip.hidden = true;
 });
 renderer.domElement.addEventListener('pointerleave', () => { tip.hidden = true; });
+const nextFinish = (id) => FINISHES[(FINISHES.findIndex((f) => f.id === id) + 1) % FINISHES.length].id;
 function showTip(e, key) {
-  tip.innerHTML = `<b>${KEY_LABEL[key]}</b> · ${cladState[key] ? 'mélèze — cliquer pour l’enduit' : 'enduit — cliquer pour le mélèze'}`;
+  tip.innerHTML = `<b>${KEY_LABEL[key]}</b> · ${FIN_NAME[cladState[key]].toLowerCase()} — cliquer pour ${FIN_NAME[nextFinish(cladState[key])].toLowerCase()}`;
   tip.hidden = false;
   const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
   tip.style.left = `${x}px`; tip.style.top = `${e.clientY + 16}px`;
