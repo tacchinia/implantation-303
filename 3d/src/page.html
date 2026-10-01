@@ -78,6 +78,8 @@ h2 .readout{font:500 11px var(--mono);letter-spacing:0;text-transform:none;color
 .facades .colh{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;text-align:center;font-weight:600}
 .facades .rowh{font-weight:600;font-size:13px;padding-right:4px}
 .facades .rowh small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.facades select.fin{width:100%;min-width:0;height:34px;font-weight:600;font-size:12px;padding:0 4px}
+.facades select.fin:not([data-fin=render]){border-color:var(--accent);background:var(--accent-soft)}
 .tog{position:relative;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;
   height:34px;font:600 12px var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
   transition:background .15s,border-color .15s}
@@ -157,8 +159,8 @@ select{font:500 13px var(--font);background:var(--chip);color:var(--ink);border:
   </div>
   <div class="panel-body">
     <section>
-      <h2>Bardage mélèze <span class="readout" id="areaOut">0 m²</span></h2>
-      <p class="hint">Lames verticales. Cliquez sur une façade dans la vue, ou utilisez la grille.</p>
+      <h2>Parement des façades <span class="readout" id="areaOut">0 m²</span></h2>
+      <p class="hint">Choisissez enduit, mélèze ou pierre pour chaque pan, dans la grille ou en cliquant la façade dans la vue (chaque clic passe à la finition suivante).</p>
       <div class="facades" id="facades">
         <span></span><span class="colh">Rez</span><span class="colh">Étage</span>
       </div>
@@ -166,14 +168,16 @@ select{font:500 13px var(--font);background:var(--chip);color:var(--ink);border:
         <button class="btn" data-preset="none">Aucun</button>
         <button class="btn" data-preset="up">Étage seul</button>
         <button class="btn" data-preset="sw">Sud + ouest</button>
-        <button class="btn" data-preset="all">Tout</button>
+        <button class="btn" data-preset="all">Tout mélèze</button>
+        <button class="btn" data-preset="mix">Pierre + mélèze</button>
       </div>
+      <div class="field"><label for="finAll">Tout appliquer</label><select id="finAll"></select><span></span></div>
       <div class="field"><label for="boardW">Largeur lame</label><input id="boardW" type="range" min="8" max="24" step="1" value="14"><output id="boardWOut">14 cm</output></div>
       <div class="field"><label for="age">Aspect</label><input id="age" type="range" min="0" max="100" step="1" value="15"><output id="ageOut">neuf</output></div>
       <div class="field"><span>Pose</span>
         <div class="seg" id="pose"><button data-v="joint" aria-pressed="false">Jointive</button><button data-v="open" aria-pressed="true">Claire-voie</button></div><span></span>
       </div>
-      <p class="hint">Le mélèze non traité prend une teinte gris argent en 2 à 5 ans, plus vite sur les façades exposées à la pluie.</p>
+      <p class="hint">Réglages du mélèze : non traité, il prend une teinte gris argent en 2 à 5 ans, plus vite sur les façades exposées à la pluie.</p>
     </section>
 
     <section>
