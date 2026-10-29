@@ -21,7 +21,9 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
   jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
 - teintes d'enduit, de toiture et de menuiseries ;
 - rue de la Mairie, accès (arrêté au bord de la rue) et place P4 en **pavés gazon**, places P5/P6 en pavage
-  continu avec une bande verte de 1,5 m côté rue, limites de parcelle, voisins
+  continu, avec deux voitures témoins, selon deux variantes : **ouest** (actuelle, bande verte de 1,5 m côté
+  rue) ou **est** (le long de la limite est, au sud de l'ancienne maison, accès pavé depuis les pavés gazon ;
+  la verdure passe à l'ouest, traversée par une allée pavée) ; limites de parcelle, voisins
   schématiques ; muret de 30 × 15 cm en limite sud ; petits arbustes d'essences variées
   le long de la rue (sauf l'accès de 5 m) ; balcon/coursive en dalle béton ; dallage continu
   le long de la façade ouest (depuis les pavés gazon, pied de l'escalier compris) jusqu'à la terrasse sud,
@@ -31,8 +33,11 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
   dessous de la terrasse compris) ; lignée d'arbres au nord de l'accès ; quelques arbres aux alentours ;
 - soleil réglable (heure, mois) avec ombres portées, points de vue prédéfinis, boussole.
 
-Le panneau de réglages est masqué par défaut (vue en consultation seule) : ajouter **`?reglages`**
-à l'adresse pour l'afficher, p. ex. `maison-303-3d.html?reglages`.
+Paramètres d'adresse (combinables avec `&`) :
+
+- **`?reglages`** affiche le panneau de réglages, masqué par défaut (vue en consultation seule) ;
+- **`?places=est`** ou **`?places=ouest`** (défaut) choisit la variante des places P5/P6, aussi
+  modifiable dans le panneau. Exemple de lien sans réglages : `maison-303-3d.html?places=est`.
 
 Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.html`.
 

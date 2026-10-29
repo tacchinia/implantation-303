@@ -21,13 +21,35 @@ export const SCENARIO = {
   route: { pts: [[8.4, 26.15], [10.48, 26.26], [13.18, 26.41], [16.71, 26.67], [19.63, 26.92], [23.45, 27.29], [22.92, 33.38]], width: 5 },
   parkings: [
     { x: 22.12, y: 32.24, rot: 364.5, w: 2.7, h: 5, label: 'P4' },
-    // P5/P6 décalées vers l'est (+1,3 m) pour une bande verte de 1,5 m le long de la rue
-    { x: 12.53, y: 21.37, rot: 3, w: 2.7, h: 5, label: 'P5', paved: true },
-    { x: 15.38, y: 21.46, rot: 3, w: 2.7, h: 5, label: 'P6', paved: true },
   ],
-  // pavage continu de P5 + P6 : au nord l'alignement des abords pavés de la maison 169, à l'ouest
-  // une parallèle à la rue à 1,5 m (bande verte de largeur régulière, comme à l'ouest du nouveau bâtiment),
-  // au sud un bord droit qui passe sur les pavés gazon de l'accès (pas d'herbe entre les deux)
-  paved56: [[11.276, 18.807], [16.859, 19.034], [16.581, 24.309], [10.677, 24.0]],
+  // P5/P6 : deux implantations au choix (sélecteur « Places P5/P6 » ou ?places=ouest|est)
+  p56: {
+    // ouest (actuelle) : décalées vers l'est (+1,3 m) pour une bande verte de 1,5 m le long de la rue.
+    // Pavage continu : au nord l'alignement des abords pavés de la maison 169, à l'ouest une parallèle
+    // à la rue à 1,5 m (bande verte de largeur régulière, comme à l'ouest du nouveau bâtiment), au sud
+    // un bord droit qui passe sur les pavés gazon de l'accès (pas d'herbe entre les deux).
+    ouest: {
+      name: 'Ouest (actuelle)',
+      places: [
+        { x: 12.53, y: 21.37, rot: 3, w: 2.7, h: 5, label: 'P5' },
+        { x: 15.38, y: 21.46, rot: 3, w: 2.7, h: 5, label: 'P6' },
+      ],
+      paved: [[[11.276, 18.807], [16.859, 19.034], [16.581, 24.309], [10.677, 24.0]]],
+    },
+    // est (variante, visibilité depuis la rue) : places au sud-est de la maison 169, le long de la
+    // limite est, accès pavé depuis les pavés gazon ; la verdure passe à l'ouest, traversée par une
+    // allée pavée de 1,2 m le long de la bande verte (abords pavés de la maison 169 inchangés).
+    est: {
+      name: 'Est (variante)',
+      places: [
+        { x: 21.6, y: 19.4, rot: 3, w: 2.7, h: 5, label: 'P5' },
+        { x: 24.45, y: 19.5, rot: 3, w: 2.7, h: 5, label: 'P6' },
+      ],
+      paved: [
+        [[20.383, 16.833], [25.929, 17.074], [25.667, 22.067], [24.98, 22.32], [24.62, 25.2], [19.85, 24.72], [20.121, 21.826]],
+        [[11.276, 18.807], [12.477, 18.869], [11.886, 24.0], [10.678, 24.0]],
+      ],
+    },
+  },
   terrace169: { x: 21.27, y: 18.03, rot: 2, w: 3, h: 3 },
 };

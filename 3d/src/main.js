@@ -10,7 +10,8 @@ const D2R = Math.PI / 180;
 const $ = (id) => document.getElementById(id);
 const isSmall = () => window.matchMedia('(max-width: 760px)').matches;
 // panneau de réglages masqué par défaut : l'afficher avec ?reglages dans l'URL
-const SHOW_CONTROLS = new URLSearchParams(location.search).has('reglages');
+const QS = new URLSearchParams(location.search);
+const SHOW_CONTROLS = QS.has('reglages');
 if (!SHOW_CONTROLS) $('panel').hidden = true;
 
 // ─── rendu ────────────────────────────────────────────────────────────────
@@ -178,10 +179,9 @@ const B = SCENARIO.building;
   slab(-1.6, 4.6, LEN, LEN + 2.4, 0.08);
   // voitures sous le couvert + P4
   const colors = ['#8a9096', '#1f2d44', '#e8e6e1'];
-  [1.55, 4.5, 7.45].forEach((u, i) => { const c = site.makeCar(colors[i]); c.position.set(u, 0, 2.35); site.groups.cars.add(c); c.userData.local = true; });
   // les voitures du couvert suivent le repère du bâtiment
   const carsLocal = new THREE.Group(); carsLocal.position.copy(house.group.position); carsLocal.rotation.copy(house.group.rotation);
-  while (site.groups.cars.children.length) carsLocal.add(site.groups.cars.children[0]);
+  [1.55, 4.5, 7.45].forEach((u, i) => { const c = site.makeCar(colors[i]); c.position.set(u, 0, 2.35); carsLocal.add(c); });
   site.groups.cars.add(carsLocal);
   const p4 = SCENARIO.parkings[0], c4 = site.makeCar('#7a2e2a'); const [px, pz] = w2(p4.x, p4.y);
   c4.position.set(px, 0, pz); c4.rotation.y = -p4.rot * D2R + Math.PI; site.groups.cars.add(c4);
@@ -384,6 +384,23 @@ bindShow('showNeighbors', site.groups.neighbors);
 bindShow('showLimits', site.groups.limits);
 bindShow('showPeople', site.groups.people);
 bindShow('showTerrace169', site.groups.terrace169);
+// variante P5/P6 : ?places=ouest (défaut) ou ?places=est, et sélecteur du panneau
+{
+  const ids = Object.keys(SCENARIO.p56);
+  let cur = ids.includes(QS.get('places')) ? QS.get('places') : 'ouest';
+  const seg = $('p56');
+  const set = (id) => {
+    cur = id; site.setP56(id);
+    seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === id)));
+  };
+  for (const id of ids) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.v = id; b.textContent = SCENARIO.p56[id].name;
+    b.addEventListener('click', () => set(id));
+    seg.appendChild(b);
+  }
+  set(cur);
+}
 site.groups.terrace169.visible = $('showTerrace169').checked;
 $('autumn').addEventListener('change', (e) => {
   const pal = e.target.checked ? FOLIAGE.autumn : FOLIAGE.summer;

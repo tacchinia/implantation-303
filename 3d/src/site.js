@@ -224,19 +224,37 @@ export function buildSite(M, scene) {
   // accès en pavés gazon + places de parc
   const acc = new THREE.Mesh(ribbon(SCENARIO.route.pts, SCENARIO.route.width, 0.02), M.grassPaver);
   acc.receiveShadow = true; root.add(acc);
-  // P5 + P6 : un seul pavage continu (voir SCENARIO.paved56)
-  const p56 = new THREE.Mesh(flatPoly(SCENARIO.paved56, 0.03), M.pavedEast);
-  p56.receiveShadow = true; root.add(p56);
+  const parkLabel = (p, parent) => {
+    const [x, z] = w2(p.x, p.y);
+    const t = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: labelTexture(p.label, { w: 256, h: 128, font: '700 90px Archivo, Arial, sans-serif', color: 'rgba(255,255,255,.8)' }), transparent: true, depthWrite: false }));
+    t.rotation.set(-Math.PI / 2, 0, -p.rot * D2R); t.position.set(x, 0.04, z + 1.6); parent.add(t);
+  };
   for (const p of SCENARIO.parkings) {
     const [x, z] = w2(p.x, p.y);
-    if (!p.paved) {
-      const m = box(p.w, 0.05, p.h, M.grassPaver);
-      m.position.set(x, 0.0, z); m.rotation.y = -p.rot * D2R; m.castShadow = false;
-      root.add(m);
-    }
-    const t = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: labelTexture(p.label, { w: 256, h: 128, font: '700 90px Archivo, Arial, sans-serif', color: 'rgba(255,255,255,.8)' }), transparent: true, depthWrite: false }));
-    t.rotation.set(-Math.PI / 2, 0, -p.rot * D2R); t.position.set(x, 0.04, z + 1.6); root.add(t);
+    const m = box(p.w, 0.05, p.h, M.grassPaver);
+    m.position.set(x, 0.0, z); m.rotation.y = -p.rot * D2R; m.castShadow = false;
+    root.add(m); parkLabel(p, root);
   }
+  // P5 + P6 : une implantation par variante (SCENARIO.p56), pavage continu, voitures témoins ;
+  // arbres et voitures rangés aussi dans groups.trees / groups.cars pour les cases d'affichage
+  const layouts = {};
+  const witness = ['#5c6b4c', '#c7c2b6'];
+  for (const [id, L] of Object.entries(SCENARIO.p56)) {
+    const g = { ground: new THREE.Group(), trees: new THREE.Group(), cars: new THREE.Group() };
+    root.add(g.ground); groups.trees.add(g.trees); groups.cars.add(g.cars);
+    for (const poly of L.paved) {
+      const m = new THREE.Mesh(flatPoly(poly, 0.03), M.pavedEast); m.receiveShadow = true; g.ground.add(m);
+    }
+    L.places.forEach((p, i) => {
+      parkLabel(p, g.ground);
+      const c = makeCar(M, witness[i]); const [x, z] = w2(p.x, p.y);
+      c.position.set(x, 0, z); c.rotation.y = -p.rot * D2R; g.cars.add(c);  // garée en marche avant
+    });
+    layouts[id] = g;
+  }
+  const setP56 = (id) => {
+    for (const [k, g] of Object.entries(layouts)) Object.values(g).forEach((o) => { o.visible = k === id; });
+  };
   // terrasse de la maison 169 : en hauteur, au niveau du 1er étage, sur deux piliers bois (masquable)
   {
     const p = SCENARIO.terrace169, hw = p.w / 2, hd = p.h / 2, top = 2.8;
@@ -303,25 +321,28 @@ export function buildSite(M, scene) {
     }
     if (distPolyline(p, SCENARIO.route.pts) < SCENARIO.route.width / 2 + margin * 0.6) return true;
     if (pointInPoly(p, [...rw, ...re.slice().reverse()]) || distPolyline(p, rw) < 1.2 || distPolyline(p, re) < 1.2) return true;
-    for (const k of SCENARIO.parkings) if (Math.hypot(p[0] - k.x, p[1] - k.y) < 3.5 + margin * 0.3) return true;
+    for (const k of [...SCENARIO.parkings, ...SCENARIO.p56.ouest.places]) if (Math.hypot(p[0] - k.x, p[1] - k.y) < 3.5 + margin * 0.3) return true;
     return false;
   };
 
   const F = makeTreeFactory(M);
   const r = rng(303);
-  const place = (kind, mx, my, H) => {
-    const t = F[kind](r, H); const [x, z] = w2(mx, my);
-    t.position.set(x, 0, z); t.rotation.y = r() * Math.PI * 2; groups.trees.add(t);
+  const place = (kind, mx, my, H, parent = groups.trees, rr = r) => {
+    const t = F[kind](rr, H); const [x, z] = w2(mx, my);
+    t.position.set(x, 0, z); t.rotation.y = rr() * Math.PI * 2; parent.add(t);
   };
   // arbres choisis dans la parcelle
   place('birch', 21.4, 45.8, 8);          // bouleau, coin sud-est
   place('shrub', 16.5, 47.4, 1.4);
   place('shrub', 12.5, 48.6, 1.2);
-  // lignée d'arbres au nord de l'accès : limite entre ancienne et nouvelle maison (à l'est de P6)
-  for (let i = 0; i < 4; i++) place('deciduous', 17.8 + i * 1.85, 23.55 + i * 0.1, 5.2 + r() * 0.8);
-  // petits arbres dans la pelouse au sud de la maison 169
-  place('deciduous', 18.0, 21.3, 3.6);
-  place('birch', 24.3, 21.0, 4.2);
+  // variante ouest : lignée d'arbres au nord de l'accès (limite entre ancienne et nouvelle maison,
+  // à l'est de P6) et petits arbres dans la pelouse au sud de la maison 169
+  {
+    const T = layouts.ouest.trees;
+    for (let i = 0; i < 4; i++) place('deciduous', 17.8 + i * 1.85, 23.55 + i * 0.1, 5.2 + r() * 0.8, T);
+    place('deciduous', 18.0, 21.3, 3.6, T);
+    place('birch', 24.3, 21.0, 4.2, T);
+  }
   place('deciduous', 9.75, 23.2, 3.2);
   // semis aléatoire autour de la parcelle
   let n = 0, guard = 0;
@@ -334,6 +355,14 @@ export function buildSite(M, scene) {
     const k = r();
     place(k < 0.5 ? 'deciduous' : k < 0.75 ? 'conifer' : k < 0.88 ? 'birch' : 'shrub', p[0], p[1], k < 0.88 ? 6 + r() * 9 : 1.2 + r());
     n++;
+  }
+  // variante est : la verdure passe à l'ouest, entre l'allée pavée et l'accès aux places
+  // (générateur séparé : le semis ci-dessus reste identique d'une variante à l'autre)
+  {
+    const T = layouts.est.trees, r2 = rng(304);
+    for (let i = 0; i < 4; i++) place('deciduous', 13.6 + i * 1.75, 23.35 + i * 0.09, 5.2 + r2() * 0.8, T, r2);
+    place('deciduous', 15.6, 20.6, 3.6, T, r2);
+    place('birch', 18.4, 20.5, 4.2, T, r2);
   }
   // limite sud : muret de 30 cm de haut, 15 cm de large (côté intérieur de la limite)
   {
@@ -391,5 +420,6 @@ export function buildSite(M, scene) {
     groups.trees.add(crown, trunk);
   }
 
-  return { root, groups, makeCar: (c) => makeCar(M, c) };
+  setP56('ouest');
+  return { root, groups, setP56, makeCar: (c) => makeCar(M, c) };
 }

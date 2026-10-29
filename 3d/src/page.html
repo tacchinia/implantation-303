@@ -73,6 +73,7 @@ h2{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-we
   display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 h2 .readout{font:500 11px var(--mono);letter-spacing:0;text-transform:none;color:var(--muted)}
 .hint{margin:0;font-size:12.5px;color:var(--muted)}
+.hint code{font:500 11.5px var(--mono);white-space:nowrap}
 
 /* grille façades × niveaux */
 .facades{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center}
@@ -159,6 +160,12 @@ select{font:500 13px var(--font);background:var(--chip);color:var(--ink);border:
     <button class="collapse" id="collapse" aria-expanded="true">Réduire</button>
   </div>
   <div class="panel-body">
+    <section>
+      <h2>Variante d'aménagement</h2>
+      <div class="field"><span>Places P5/P6</span><div class="seg" id="p56"></div><span></span></div>
+      <p class="hint">Lien direct sans réglages : <code>?places=ouest</code> ou <code>?places=est</code>.</p>
+    </section>
+
     <section>
       <h2>Parement des façades <span class="readout" id="areaOut">0 m²</span></h2>
       <p class="hint">Choisissez enduit, mélèze ou pierre pour chaque pan, dans la grille ou en cliquant la façade dans la vue (chaque clic passe à la finition suivante).</p>
