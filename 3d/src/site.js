@@ -73,6 +73,16 @@ function ribbon(pts, width, y, closed = false) {
   return g;
 }
 
+// parallèle à une polyligne orientée nord–sud, décalée de d vers l'ouest
+function offsetLine(pts, d) {
+  return pts.map((cur, i) => {
+    const prev = pts[Math.max(0, i - 1)], next = pts[Math.min(pts.length - 1, i + 1)];
+    const tx = next[0] - prev[0], ty = next[1] - prev[1], L = Math.hypot(tx, ty);
+    let nx = -ty / L, ny = tx / L; if (nx > 0) { nx = -nx; ny = -ny; }
+    return [cur[0] + nx * d, cur[1] + ny * d];
+  });
+}
+
 function flatPoly(pts, y) {
   const shape = new THREE.Shape(pts.map(([x, z]) => { const [a, b] = w2(x, z); return new THREE.Vector2(a, -b); }));
   const g = new THREE.ShapeGeometry(shape);
@@ -209,6 +219,9 @@ export function buildSite(M, scene) {
   const rw = extendLine(GEO.road_w, 120), re = extendLine(GEO.road_e, 120);
   const road = new THREE.Mesh(flatPoly([...rw, ...re.slice().reverse()], 0.01), M.asphalt);
   road.receiveShadow = true; root.add(road);
+  // trottoir ouest, de la bordure à la limite de la parcelle de la rue
+  const walk = new THREE.Mesh(flatPoly([...rw, ...offsetLine(rw, 2.3).reverse()], 0.04), M.sidewalk);
+  walk.receiveShadow = true; root.add(walk);
   // bordures
   for (const line of [rw, re]) {
     const b = new THREE.Mesh(ribbon(line, 0.18, 0.05), M.curb); b.receiveShadow = true; root.add(b);
@@ -286,12 +299,13 @@ export function buildSite(M, scene) {
   // abords pavés de la maison 169 : tout le côté est jusqu'à la limite, et au sud, de la rue
   // jusqu'à la limite est. Au sud, le bord suit l'alignement des places P5/P6 (largeur variable
   // selon les décrochements de la façade) ; le dessous de la terrasse est pavé.
+  const pave169 = [
+    [22.852, 5.309], [27.884, 5.227], [26.24, 19.58], [9.78, 18.73],               // est, limite est, alignement P5/P6
+    [10.08, 16.2], [10.756, 16.177], [15.251, 16.386], [15.251, 17.442],            // façade sud (décrochements)
+    [19.712, 17.543], [19.761, 16.475], [22.594, 16.531],
+  ];
   {
-    const pave = new THREE.Mesh(flatPoly([
-      [22.852, 5.309], [27.884, 5.227], [26.24, 19.58], [9.78, 18.73],             // est, limite est, alignement P5/P6
-      [10.08, 16.2], [10.756, 16.177], [15.251, 16.386], [15.251, 17.442],          // façade sud (décrochements)
-      [19.712, 17.543], [19.761, 16.475], [22.594, 16.531],
-    ], 0.03), M.pavedEast);
+    const pave = new THREE.Mesh(flatPoly(pave169, 0.03), M.pavedEast);
     pave.receiveShadow = true; root.add(pave);
   }
 
@@ -413,7 +427,8 @@ export function buildSite(M, scene) {
         const inset = 0.3 + r() * 0.25;
         // intérieur de la parcelle : à gauche du sens de parcours (limite parcourue sud → nord)
         const p = [ax + ux * d - uy * inset, ay + uy * d + ux * inset];
-        if (Math.abs(p[1] - access[1]) > SCENARIO.route.width / 2 + 0.3) {
+        // pas d'arbuste sur l'accès ni sur les abords pavés de la maison 169 (angle sud-ouest)
+        if (Math.abs(p[1] - access[1]) > SCENARIO.route.width / 2 + 0.3 && !pointInPoly(p, pave169)) {
           let sp; do { sp = species[Math.floor(r() * species.length)]; } while (sp === prev);
           prev = sp;
           const [h0, h1] = heights[sp], H = h0 + r() * (h1 - h0);

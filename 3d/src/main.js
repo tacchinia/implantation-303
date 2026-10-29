@@ -80,6 +80,7 @@ const M = {
   lamp: std({ color: '#f4f1e8', emissive: '#6d6a60', roughness: 0.3 }),
   concrete: std({ map: TX.renderTexture(), color: '#bdbab3', roughness: 0.9 }),
   lowWall: std({ map: TX.renderTexture(), color: '#c8c4bb', roughness: 0.9 }),
+  sidewalk: std({ map: TX.paverTexture('#cbc7be', 0.2, 0.1, 1.2, 61), roughness: 0.9 }),
   pavedEast: std({ map: TX.paverTexture('#bdb6a8', 0.2, 0.1, 1.2, 47), roughness: 0.9 }),
   timber: std({ color: '#8a6a4a', roughness: 0.85 }),
   shrubs: {

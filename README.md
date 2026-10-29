@@ -20,14 +20,16 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
   face au sud ; par défaut : mélèze à l'étage sur la façade sud, l'ouest droite et le décrochement ouest), en cliquant directement sur un mur ou via la grille ; largeur de lame, pose
   jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
 - teintes d'enduit, de toiture et de menuiseries ;
-- rue de la Mairie, accès (arrêté au bord de la rue) et place P4 en **pavés gazon**, places P5/P6 en pavage
-  continu, avec deux voitures témoins, selon deux variantes : **ouest** (actuelle, hors de la zone de
-  visibilité de l'accès avec 0,5 m de marge, passage piéton de 1,2 m entre P5 et P6 dans l'axe de la porte
+- rue de la Mairie relevée sur le cadastre (chaussée jusqu'à la bordure du trottoir ouest, trottoir jusqu'à
+  la limite de la parcelle de la rue), accès (arrêté au bord de la rue) et place P4 en **pavés gazon**, places P5/P6 en pavage
+  continu, avec deux voitures témoins, selon deux variantes : **ouest** (actuelle, le plus à l'ouest possible
+  juste à côté de la zone de visibilité de l'accès, passage piéton de 1,2 m entre P5 et P6 dans l'axe de la porte
   de l'ancienne maison, gazon entre la haie et P5) ou **est** (le long de la limite est, au sud de l'ancienne maison, accès pavé depuis les pavés gazon ;
   la verdure passe à l'ouest, traversée par une allée pavée) ; limites de parcelle, voisins
   schématiques ; muret de 30 × 15 cm en limite sud ; haie basse d'arbustes d'essences variées
-  le long de la rue (sauf l'accès de 5 m), 0,60 m au plus ; **zones de visibilité** de l'accès (case à cocher :
-  triangles nord et sud au sol, lignes de visibilité) ; balcon/coursive en dalle béton ; dallage continu
+  le long de la rue (sauf l'accès de 5 m), 0,60 m au plus ; **zones de visibilité** de l'accès selon le schéma de
+  la loi sur les accès (case à cocher : point d'observation sur l'axe de l'accès à 3 m du bord de la chaussée,
+  points visés à 20 m et à 1,5 m du bord de la voie empruntée, triangles nord et sud au sol, lignes de visibilité) ; balcon/coursive en dalle béton ; dallage continu
   le long de la façade ouest (depuis les pavés gazon, pied de l'escalier compris) jusqu'à la terrasse sud,
   qui s'arrête au droit de la grande baie ; terrasse de l'ancienne maison en hauteur (1er étage, deux
   piliers bois), masquée par défaut ; côté est et côté sud de
