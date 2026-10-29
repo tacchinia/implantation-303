@@ -31,10 +31,10 @@ export const SCENARIO = {
     ouest: {
       name: 'Ouest (actuelle)',
       places: [
-        { x: 13.49, y: 21.42, rot: 3, w: 2.7, h: 5, label: 'P5' },
-        { x: 17.39, y: 21.65, rot: 3, w: 2.7, h: 5, label: 'P6' },
+        { x: 12.94, y: 21.389, rot: 3, w: 2.7, h: 5, label: 'P5' },
+        { x: 16.84, y: 21.667, rot: 3, w: 2.7, h: 5, label: 'P6' },
       ],
-      paved: [[[12.273, 18.853], [18.869, 19.224], [18.592, 24.5], [11.998, 24.1]]],
+      paved: [[[11.723, 18.822], [18.319, 19.24], [18.043, 24.503], [11.448, 24.07]]],
     },
     // est (variante, visibilité depuis la rue) : places au sud-est de la maison 169, le long de la
     // limite est, accès pavé depuis les pavés gazon ; la verdure passe à l'ouest, traversée par une
@@ -52,10 +52,12 @@ export const SCENARIO = {
     },
   },
   terrace169: { x: 21.27, y: 18.03, rot: 2, w: 3, h: 3 },
-  // visibilité de l'accès sur la rue de la Mairie : point d'observation O, triangles à garder libres
-  // (rien de plus de 0,60 m), lignes de visibilité vers le nord et le sud
+  // visibilité de l'accès sur la rue de la Mairie : point d'observation O sur l'axe de l'allée en pavés
+  // gazon, à 3 m du bord de la rue ; F = pied de la perpendiculaire sur le bord de la rue ; lignes de
+  // visibilité vers des points de la chaussée à la même distance de l'accès (nord et sud), qui coupent le
+  // bord de la rue en I (nord) et S (sud). Triangles O–F–I et O–F–S à garder libres (rien > 0,60 m).
   visibility: {
-    triangles: [[[12.04, 25.29], [9.06, 24.95], [9.70, 19.39]], [[12.04, 25.29], [9.06, 24.95], [7.99, 38.53]]],
-    lines: [[[12.04, 25.29], [4.03, 5.09]], [[12.04, 25.29], [6.07, 44.79]]],
+    triangles: [[[11.918, 26.34], [8.938, 25.997], [9.578, 20.44]], [[11.918, 26.34], [8.938, 25.997], [7.922, 39.511]]],
+    lines: [[[11.918, 26.34], [3.904, 6.136]], [[11.918, 26.34], [6.001, 45.841]]],
   },
 };
