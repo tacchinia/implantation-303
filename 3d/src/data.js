@@ -39,8 +39,8 @@ export const SCENARIO = {
       paved: [[[11.523, 18.811], [18.119, 19.226], [17.843, 24.489], [11.261, 23.804]]],
     },
     // est (variante, visibilité depuis la rue) : places au sud-est de la maison 169, le long de la
-    // limite est, accès pavé depuis les pavés gazon ; la verdure passe à l'ouest, traversée par une
-    // allée pavée de 1,2 m le long de la bande verte (abords pavés de la maison 169 inchangés).
+    // limite est, accès pavé depuis les pavés gazon ; la verdure passe à l'ouest, en gazon jusqu'à la
+    // haie basse (abords pavés de la maison 169 inchangés).
     est: {
       name: 'Est (variante)',
       places: [
@@ -49,7 +49,6 @@ export const SCENARIO = {
       ],
       paved: [
         [[20.383, 16.833], [25.929, 17.074], [25.667, 22.067], [24.98, 22.32], [24.62, 25.2], [19.85, 24.72], [20.121, 21.826]],
-        [[11.276, 18.807], [12.477, 18.869], [11.886, 24.0], [10.678, 24.0]],
       ],
     },
   },

@@ -394,7 +394,7 @@ export function buildSite(M, scene) {
     place(k < 0.5 ? 'deciduous' : k < 0.75 ? 'conifer' : k < 0.88 ? 'birch' : 'shrub', p[0], p[1], k < 0.88 ? 6 + r() * 9 : 1.2 + r());
     n++;
   }
-  // variante est : la verdure passe à l'ouest, entre l'allée pavée et l'accès aux places
+  // variante est : la verdure passe à l'ouest, entre la haie et l'accès aux places
   // (générateur séparé : le semis ci-dessus reste identique d'une variante à l'autre)
   {
     const T = layouts.est.trees, r2 = rng(304);
