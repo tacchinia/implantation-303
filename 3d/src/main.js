@@ -9,6 +9,10 @@ import { SCENARIO } from './data.js';
 const D2R = Math.PI / 180;
 const $ = (id) => document.getElementById(id);
 const isSmall = () => window.matchMedia('(max-width: 760px)').matches;
+// panneau de réglages masqué par défaut : l'afficher avec ?reglages dans l'URL
+const QS = new URLSearchParams(location.search);
+const SHOW_CONTROLS = QS.has('reglages');
+if (!SHOW_CONTROLS) $('panel').hidden = true;
 
 // ─── rendu ────────────────────────────────────────────────────────────────
 const stage = $('stage');
@@ -55,8 +59,9 @@ const M = {
   door: std({ color: '#33373b', roughness: 0.5, metalness: 0.2 }),
   metal: std({ color: '#3a3e42', roughness: 0.45, metalness: 0.6 }),
   glass: new THREE.MeshPhysicalMaterial({ color: '#27363f', roughness: 0.04, metalness: 0.1, envMapIntensity: 1.4, side: THREE.DoubleSide }),
-  grass: std({ map: TX.grassTexture(), roughness: 1 }),
-  grassPaver: std({ map: TX.grassPaverTexture(), roughness: 0.95, side: THREE.DoubleSide }),
+  grass: std({ map: TX.grassTexture(), roughness: 1, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 8 }),
+  // décalages de profondeur : pelouse < pavés gazon < pavés et dallages (pas de scintillement aux recouvrements)
+  grassPaver: std({ map: TX.grassPaverTexture(), roughness: 0.95, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 4 }),
   asphalt: std({ map: TX.asphaltTexture(), roughness: 0.9 }),
   curb: std({ color: '#b9b6ae', roughness: 0.9, side: THREE.DoubleSide }),
   carportFloor: std({ map: TX.paverTexture(), roughness: 0.9 }),
@@ -75,6 +80,7 @@ const M = {
   lamp: std({ color: '#f4f1e8', emissive: '#6d6a60', roughness: 0.3 }),
   concrete: std({ map: TX.renderTexture(), color: '#bdbab3', roughness: 0.9 }),
   lowWall: std({ map: TX.renderTexture(), color: '#c8c4bb', roughness: 0.9 }),
+  sidewalk: std({ map: TX.paverTexture('#cbc7be', 0.2, 0.1, 1.2, 61), roughness: 0.9 }),
   pavedEast: std({ map: TX.paverTexture('#bdb6a8', 0.2, 0.1, 1.2, 47), roughness: 0.9 }),
   timber: std({ color: '#8a6a4a', roughness: 0.85 }),
   shrubs: {
@@ -160,18 +166,23 @@ const B = SCENARIO.building;
   const floor = new THREE.Mesh(new THREE.BoxGeometry(W + 0.4, 0.06, 5.5), M.carportFloor);
   floor.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 5.5 : W + 0.4); });
   floor.position.set(W / 2, 0.0, -0.55 + 2.75); floor.receiveShadow = true; house.group.add(floor);
-  const path = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.06, 13.3), M.slab);
-  path.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 13.3 : 1.6); });
-  path.position.set(-0.8, 0.0, 2.3 + 6.65); path.receiveShadow = true; house.group.add(path);
-  const terr = new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.08, 2.4), M.slab);
-  terr.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 2.4 : 7.4); });
-  terr.position.set(3.9, 0.0, LEN + 1.2); terr.receiveShadow = true; house.group.add(terr);
+  // dallage : passage le long de la façade ouest, depuis les pavés gazon de l'accès (pied de l'escalier
+  // compris) jusqu'au sud, puis terrasse sud d'un seul tenant jusqu'au droit de la grande baie vitrée.
+  // UV en coordonnées locales : le calepinage se raccorde entre les deux surfaces.
+  const slab = (u0, u1, v0, v1, th) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(u1 - u0, th, v1 - v0), M.slab);
+    m.position.set((u0 + u1) / 2, 0.0, (v0 + v1) / 2);
+    const pos = m.geometry.attributes.position, uv = m.geometry.attributes.uv;
+    for (let i = 0; i < pos.count; i++) uv.setXY(i, pos.getX(i) + m.position.x, -(pos.getZ(i) + m.position.z));
+    m.receiveShadow = true; house.group.add(m);
+  };
+  slab(-1.6, 0, -0.55, LEN, 0.05);                 // bord nord aligné sur celui du sol du couvert
+  slab(-1.6, 4.6, LEN, LEN + 2.4, 0.08);
   // voitures sous le couvert + P4
   const colors = ['#8a9096', '#1f2d44', '#e8e6e1'];
-  [1.55, 4.5, 7.45].forEach((u, i) => { const c = site.makeCar(colors[i]); c.position.set(u, 0, 2.35); site.groups.cars.add(c); c.userData.local = true; });
   // les voitures du couvert suivent le repère du bâtiment
   const carsLocal = new THREE.Group(); carsLocal.position.copy(house.group.position); carsLocal.rotation.copy(house.group.rotation);
-  while (site.groups.cars.children.length) carsLocal.add(site.groups.cars.children[0]);
+  [1.55, 4.5, 7.45].forEach((u, i) => { const c = site.makeCar(colors[i]); c.position.set(u, 0, 2.35); carsLocal.add(c); });
   site.groups.cars.add(carsLocal);
   const p4 = SCENARIO.parkings[0], c4 = site.makeCar('#7a2e2a'); const [px, pz] = w2(p4.x, p4.y);
   c4.position.set(px, 0, pz); c4.rotation.y = -p4.rot * D2R + Math.PI; site.groups.cars.add(c4);
@@ -182,7 +193,7 @@ const B = SCENARIO.building;
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), M.person); head.position.y = 1.64;
   [torso, head, limb(0.07, 0.72, -0.1, 0.44, 0), limb(0.07, 0.72, 0.1, 0.44, 0), limb(0.05, 0.55, -0.25, 1.18, 0), limb(0.05, 0.55, 0.25, 1.18, 0)]
     .forEach((m) => { m.castShadow = true; person.add(m); });
-  person.position.set(-2.3, 0, 1.5);
+  person.position.set(-0.6, 0, 2.1);                 // au pied de l'escalier, hors zone de visibilité
   const pl = new THREE.Group(); pl.position.copy(house.group.position); pl.rotation.copy(house.group.rotation); pl.add(person);
   site.groups.people.add(pl);
 }
@@ -199,9 +210,11 @@ const FINISHES = [
   { id: 'larch', name: 'Mélèze' },
   ...Object.entries(TX.STONES).map(([id, s]) => ({ id, name: s.name })),
 ];
+// par défaut : mélèze à l'étage sur la façade sud, la façade ouest côté balcon et le décrochement ouest
+const DEFAULT_LARCH = ['S_up', 'W_up_S', 'W_up_R'];
 const FIN_NAME = Object.fromEntries(FINISHES.map((f) => [f.id, f.name]));
 const finMat = (id) => (id === 'larch' ? M.larch : M['stone_' + id]);
-const cladState = Object.fromEntries(Object.values(FACADES).flatMap((f) => f.keys).filter(Boolean).map((k) => [k, k === 'W_up_S' ? 'larch' : 'render']));
+const cladState = Object.fromEntries(Object.values(FACADES).flatMap((f) => f.keys).filter(Boolean).map((k) => [k, DEFAULT_LARCH.includes(k) ? 'larch' : 'render']));
 const facadesEl = $('facades');
 const toggles = {};
 const optionsHtml = FINISHES.map((f) => `<option value="${f.id}">${f.name}</option>`).join('');
@@ -304,13 +317,14 @@ function pick(e) {
   return hit && hit.object.userData.key ? hit.object.userData.key : null;
 }
 renderer.domElement.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
-renderer.domElement.addEventListener('pointerup', (e) => {
+// sans les réglages, la vue reste en consultation seule (pas de changement de parement au clic)
+if (SHOW_CONTROLS) renderer.domElement.addEventListener('pointerup', (e) => {
   if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) { down = null; return; }
   down = null;
   const key = pick(e);
   if (key) { setClad(key, nextFinish(cladState[key])); showTip(e, key); }
 });
-renderer.domElement.addEventListener('pointermove', (e) => {
+if (SHOW_CONTROLS) renderer.domElement.addEventListener('pointermove', (e) => {
   if (e.pointerType !== 'mouse' || e.buttons) { tip.hidden = true; return; }
   const key = pick(e);
   hoverKey = key;
@@ -370,6 +384,26 @@ bindShow('showCars', site.groups.cars);
 bindShow('showNeighbors', site.groups.neighbors);
 bindShow('showLimits', site.groups.limits);
 bindShow('showPeople', site.groups.people);
+bindShow('showTerrace169', site.groups.terrace169);
+bindShow('showVisibility', site.groups.visibility);
+// variante P5/P6 : ?places=ouest (défaut) ou ?places=est, et sélecteur du panneau
+{
+  const ids = Object.keys(SCENARIO.p56);
+  let cur = ids.includes(QS.get('places')) ? QS.get('places') : 'ouest';
+  const seg = $('p56');
+  const set = (id) => {
+    cur = id; site.setP56(id);
+    seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === id)));
+  };
+  for (const id of ids) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.v = id; b.textContent = SCENARIO.p56[id].name;
+    b.addEventListener('click', () => set(id));
+    seg.appendChild(b);
+  }
+  set(cur);
+}
+site.groups.terrace169.visible = $('showTerrace169').checked;
 $('autumn').addEventListener('change', (e) => {
   const pal = e.target.checked ? FOLIAGE.autumn : FOLIAGE.summer;
   M.foliage.forEach((m, i) => m.color.set(pal[i]));

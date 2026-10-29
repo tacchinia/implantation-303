@@ -12,7 +12,9 @@ export const GEO = {
   house165: [[34.254, 9.808], [43.139, 9.692], [43.139, 16.968], [47.996, 16.968], [48.116, 30.102], [39.219, 30.218], [39.219, 27.198], [34.254, 27.198]],
   tl_bldg: [[12.768, 0.0], [23.039, 0.0], [22.945, 1.419], [26.925, 1.747], [27.138, 5.171], [23.106, 5.212], [12.537, 4.667]],
   road_e: [[11.909, 0.0], [11.461, 4.674], [9.681, 19.544], [8.643, 28.556], [7.172, 50.897], [8.176, 55.179]],
-  road_w: [[3.192, 0.0], [0.0, 24.454], [1.717, 28.374], [1.344, 34.347], [1.195, 37.334], [1.083, 40.32], [0.971, 43.307], [0.971, 46.294], [1.12, 49.28], [1.269, 52.267], [1.493, 55.179]],
+  // bord ouest de la chaussée : ligne fine du cadastre (bordure du trottoir ouest), relevée sur le plan
+  // embarqué de l'outil ; à l'ouest, trottoir jusqu'à la limite de la parcelle de la rue (≈ 2,3 m)
+  road_w: [[5.64, 0.0], [4.52, 8], [3.36, 16], [2.76, 20], [2.2, 24], [1.75, 28], [1.49, 32], [1.27, 36], [1.12, 40], [0.97, 44], [0.97, 46], [1.01, 48], [1.12, 50], [1.23, 52], [1.46, 54], [1.64, 55.18]],
 };
 
 export const SCENARIO = {
@@ -21,8 +23,45 @@ export const SCENARIO = {
   route: { pts: [[8.4, 26.15], [10.48, 26.26], [13.18, 26.41], [16.71, 26.67], [19.63, 26.92], [23.45, 27.29], [22.92, 33.38]], width: 5 },
   parkings: [
     { x: 22.12, y: 32.24, rot: 364.5, w: 2.7, h: 5, label: 'P4' },
-    { x: 11.23, y: 21.3, rot: 3, w: 2.7, h: 5, label: 'P5', paved: true },
-    { x: 14.08, y: 21.39, rot: 3, w: 2.7, h: 5, label: 'P6', paved: true },
   ],
+  // P5/P6 : deux implantations au choix (sélecteur « Places P5/P6 » ou ?places=ouest|est)
+  p56: {
+    // ouest (actuelle) : places le plus à l'ouest possible, juste à côté de la zone de visibilité de
+    // l'accès (2 cm du triangle nord O–F–I), passage piéton de 1,2 m entre P5 et P6 dans l'axe de la porte de la maison 169,
+    // extrémité sud au bord nord de l'accès. Pavage continu limité aux places et au passage : à l'ouest
+    // de P5, gazon jusqu'à la haie basse ; au sud, un bord droit qui passe sur les pavés gazon.
+    ouest: {
+      name: 'Ouest (actuelle)',
+      places: [
+        { x: 12.74, y: 21.378, rot: 3, w: 2.7, h: 5, label: 'P5' },
+        { x: 16.64, y: 21.652, rot: 3, w: 2.7, h: 5, label: 'P6' },
+      ],
+      paved: [[[11.523, 18.811], [18.119, 19.226], [17.843, 24.489], [11.261, 23.804]]],
+    },
+    // est (variante, visibilité depuis la rue) : places au sud-est de la maison 169, le long de la
+    // limite est, accès pavé depuis les pavés gazon ; la verdure passe à l'ouest, traversée par une
+    // allée pavée de 1,2 m le long de la bande verte (abords pavés de la maison 169 inchangés).
+    est: {
+      name: 'Est (variante)',
+      places: [
+        { x: 21.6, y: 19.4, rot: 3, w: 2.7, h: 5, label: 'P5' },
+        { x: 24.45, y: 19.5, rot: 3, w: 2.7, h: 5, label: 'P6' },
+      ],
+      paved: [
+        [[20.383, 16.833], [25.929, 17.074], [25.667, 22.067], [24.98, 22.32], [24.62, 25.2], [19.85, 24.72], [20.121, 21.826]],
+        [[11.276, 18.807], [12.477, 18.869], [11.886, 24.0], [10.678, 24.0]],
+      ],
+    },
+  },
   terrace169: { x: 21.27, y: 18.03, rot: 2, w: 3, h: 3 },
+  // visibilité de l'accès sur la rue de la Mairie (schéma de la loi sur les accès, en localité) :
+  // point d'observation O sur l'axe de l'allée en pavés gazon, à B = 3 m du bord de la chaussée ;
+  // F = pied de la perpendiculaire sur ce bord ; points visés à A = 20 m de l'axe de l'accès (mesuré le
+  // long du bord de la chaussée), à 1,5 m du bord de la voie empruntée : au sud (gauche) 1,5 m du bord
+  // côté accès, au nord (droite) 1,5 m du bord opposé. Les lignes de visibilité coupent le bord côté accès
+  // en I (nord) et S (sud) ; triangles O–F–I et O–F–S à garder libres (rien > 0,60 m).
+  visibility: {
+    triangles: [[[11.918, 26.34], [8.938, 25.997], [9.813, 18.44]], [[11.918, 26.34], [8.938, 25.997], [7.921, 39.514]]],
+    lines: [[[11.918, 26.34], [6.378, 5.547]], [[11.918, 26.34], [6.001, 45.844]]],
+  },
 };
