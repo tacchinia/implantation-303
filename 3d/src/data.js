@@ -24,17 +24,17 @@ export const SCENARIO = {
   ],
   // P5/P6 : deux implantations au choix (sélecteur « Places P5/P6 » ou ?places=ouest|est)
   p56: {
-    // ouest (actuelle) : décalées vers l'est (+1,3 m) pour une bande verte de 1,5 m le long de la rue.
-    // Pavage continu : au nord l'alignement des abords pavés de la maison 169, à l'ouest une parallèle
-    // à la rue à 1,5 m (bande verte de largeur régulière, comme à l'ouest du nouveau bâtiment), au sud
-    // un bord droit qui passe sur les pavés gazon de l'accès (pas d'herbe entre les deux).
+    // ouest (actuelle) : places hors de la zone de visibilité de l'accès (marge ≥ 0,5 m au triangle
+    // nord O–F–I), passage piéton de 1,2 m entre P5 et P6 dans l'axe de la porte de la maison 169,
+    // extrémité sud au bord nord de l'accès. Pavage continu limité aux places et au passage : à l'ouest
+    // de P5, gazon jusqu'à la haie basse ; au sud, un bord droit qui passe sur les pavés gazon.
     ouest: {
       name: 'Ouest (actuelle)',
       places: [
-        { x: 12.53, y: 21.37, rot: 3, w: 2.7, h: 5, label: 'P5' },
-        { x: 15.38, y: 21.46, rot: 3, w: 2.7, h: 5, label: 'P6' },
+        { x: 13.49, y: 21.42, rot: 3, w: 2.7, h: 5, label: 'P5' },
+        { x: 17.39, y: 21.65, rot: 3, w: 2.7, h: 5, label: 'P6' },
       ],
-      paved: [[[11.276, 18.807], [16.859, 19.034], [16.581, 24.309], [10.677, 24.0]]],
+      paved: [[[12.273, 18.853], [18.869, 19.224], [18.592, 24.5], [11.998, 24.1]]],
     },
     // est (variante, visibilité depuis la rue) : places au sud-est de la maison 169, le long de la
     // limite est, accès pavé depuis les pavés gazon ; la verdure passe à l'ouest, traversée par une
@@ -52,4 +52,10 @@ export const SCENARIO = {
     },
   },
   terrace169: { x: 21.27, y: 18.03, rot: 2, w: 3, h: 3 },
+  // visibilité de l'accès sur la rue de la Mairie : point d'observation O, triangles à garder libres
+  // (rien de plus de 0,60 m), lignes de visibilité vers le nord et le sud
+  visibility: {
+    triangles: [[[12.04, 25.29], [9.06, 24.95], [9.70, 19.39]], [[12.04, 25.29], [9.06, 24.95], [7.99, 38.53]]],
+    lines: [[[12.04, 25.29], [4.03, 5.09]], [[12.04, 25.29], [6.07, 44.79]]],
+  },
 };

@@ -169,6 +169,14 @@ function makeTreeFactory(M) {
   };
 }
 
+// hauteur maximale de la végétation côté rue (zones de visibilité de l'accès) : marge sous 0,60 m
+const LOW = 0.58;
+function capHeight(obj, hmax) {
+  const top = new THREE.Box3().setFromObject(obj).max.y;
+  if (top > hmax) obj.scale.multiplyScalar(hmax / top);
+  return obj;
+}
+
 // ─── voiture stylisée ─────────────────────────────────────────────────────
 function makeCar(M, color) {
   const g = new THREE.Group();
@@ -186,7 +194,7 @@ function makeCar(M, color) {
 
 // ─── assemblage du site ───────────────────────────────────────────────────
 export function buildSite(M, scene) {
-  const groups = { trees: new THREE.Group(), cars: new THREE.Group(), neighbors: new THREE.Group(), limits: new THREE.Group(), people: new THREE.Group(), terrace169: new THREE.Group() };
+  const groups = { trees: new THREE.Group(), cars: new THREE.Group(), neighbors: new THREE.Group(), limits: new THREE.Group(), people: new THREE.Group(), terrace169: new THREE.Group(), visibility: new THREE.Group() };
   const root = new THREE.Group();
   Object.values(groups).forEach((g) => root.add(g));
   scene.add(root);
@@ -294,6 +302,18 @@ export function buildSite(M, scene) {
     const [x, z] = w2(...p); groups.limits.add(box(0.12, 0.25, 0.12, M.limitPost, x, 0.12, z));
   }
 
+  // zones de visibilité de l'accès (masquées par défaut) : triangles au sol et lignes de visibilité
+  {
+    const V = SCENARIO.visibility;
+    const zone = new THREE.MeshBasicMaterial({ color: '#e0261b', transparent: true, opacity: 0.38, side: THREE.DoubleSide, depthWrite: false });
+    const line = new THREE.MeshBasicMaterial({ color: '#c4140b', transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
+    for (const t of V.triangles) groups.visibility.add(new THREE.Mesh(flatPoly(t, 0.07), zone));
+    for (const l of V.lines) groups.visibility.add(new THREE.Mesh(ribbon(l, 0.08, 0.075), line));
+    for (const t of V.triangles) groups.visibility.add(new THREE.Mesh(ribbon(t, 0.05, 0.075, true), line));
+    groups.visibility.traverse((o) => { o.renderOrder = 2; });
+    groups.visibility.visible = false;
+  }
+
   // bâtiments voisins (volumes schématiques)
   const neighbor = (pts, h, roofH) => {
     const shape = new THREE.Shape(pts.map(([x, z]) => { const [a, b] = w2(x, z); return new THREE.Vector2(a, -b); }));
@@ -339,11 +359,15 @@ export function buildSite(M, scene) {
   // à l'est de P6) et petits arbres dans la pelouse au sud de la maison 169
   {
     const T = layouts.ouest.trees;
-    for (let i = 0; i < 4; i++) place('deciduous', 17.8 + i * 1.85, 23.55 + i * 0.1, 5.2 + r() * 0.8, T);
-    place('deciduous', 18.0, 21.3, 3.6, T);
+    for (let i = 0; i < 3; i++) place('deciduous', 20.1 + i * 2.0, 23.6 + i * 0.1, 5.2 + r() * 0.8, T);
+    place('deciduous', 21.6, 21.0, 3.6, T);
     place('birch', 24.3, 21.0, 4.2, T);
   }
-  place('deciduous', 9.75, 23.2, 3.2);
+  // zone de visibilité nord : arbuste bas (≤ 0,60 m) à la place de l'ancien petit arbre
+  {
+    const t = capHeight(F.smallShrub(r, 0.5, 'buis'), LOW); const [x, z] = w2(9.75, 23.2);
+    t.position.set(x, 0, z); groups.trees.add(t);
+  }
   // semis aléatoire autour de la parcelle
   let n = 0, guard = 0;
   while (n < 24 && guard++ < 4000) {
@@ -378,7 +402,8 @@ export function buildSite(M, scene) {
   {
     const line = [GEO.boundaries.west[0], GEO.boundaries.west[1], GEO.boundaries.west[2], [10.08, 16.2]];
     const species = ['buis', 'lavande', 'cornouiller', 'thuya', 'spiree', 'berberis', 'graminee'];
-    const heights = { buis: [0.5, 0.8], lavande: [0.45, 0.6], cornouiller: [1.0, 1.4], thuya: [0.8, 1.3], spiree: [0.7, 1.0], berberis: [0.6, 0.95], graminee: [0.8, 1.2] };
+    // haie basse (remplace le mur) : tous les arbustes ramenés à 0,60 m au plus (zones de visibilité)
+    const heights = { buis: [0.4, 0.55], lavande: [0.4, 0.55], cornouiller: [0.45, 0.6], thuya: [0.45, 0.6], spiree: [0.45, 0.6], berberis: [0.45, 0.6], graminee: [0.45, 0.6] };
     const access = SCENARIO.route.pts[0];                 // axe de l'accès à la rue
     let prev = -1, d = 0.6;
     for (let i = 0; i < line.length - 1; i++) {
@@ -392,7 +417,7 @@ export function buildSite(M, scene) {
           let sp; do { sp = species[Math.floor(r() * species.length)]; } while (sp === prev);
           prev = sp;
           const [h0, h1] = heights[sp], H = h0 + r() * (h1 - h0);
-          const t = F.smallShrub(r, H, sp); const [x, z] = w2(...p);
+          const t = capHeight(F.smallShrub(r, H, sp), LOW); const [x, z] = w2(...p);
           t.position.set(x, 0, z); t.rotation.y = r() * 6.3; groups.trees.add(t);
         }
         d += 1.1 + r() * 0.8;                             // espacement irrégulier

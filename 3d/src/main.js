@@ -192,7 +192,7 @@ const B = SCENARIO.building;
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), M.person); head.position.y = 1.64;
   [torso, head, limb(0.07, 0.72, -0.1, 0.44, 0), limb(0.07, 0.72, 0.1, 0.44, 0), limb(0.05, 0.55, -0.25, 1.18, 0), limb(0.05, 0.55, 0.25, 1.18, 0)]
     .forEach((m) => { m.castShadow = true; person.add(m); });
-  person.position.set(-2.3, 0, 1.5);
+  person.position.set(-0.6, 0, 2.1);                 // au pied de l'escalier, hors zone de visibilité
   const pl = new THREE.Group(); pl.position.copy(house.group.position); pl.rotation.copy(house.group.rotation); pl.add(person);
   site.groups.people.add(pl);
 }
@@ -384,6 +384,7 @@ bindShow('showNeighbors', site.groups.neighbors);
 bindShow('showLimits', site.groups.limits);
 bindShow('showPeople', site.groups.people);
 bindShow('showTerrace169', site.groups.terrace169);
+bindShow('showVisibility', site.groups.visibility);
 // variante P5/P6 : ?places=ouest (défaut) ou ?places=est, et sélecteur du panneau
 {
   const ids = Object.keys(SCENARIO.p56);
