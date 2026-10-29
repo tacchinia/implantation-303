@@ -186,7 +186,7 @@ function makeCar(M, color) {
 
 // ─── assemblage du site ───────────────────────────────────────────────────
 export function buildSite(M, scene) {
-  const groups = { trees: new THREE.Group(), cars: new THREE.Group(), neighbors: new THREE.Group(), limits: new THREE.Group(), people: new THREE.Group() };
+  const groups = { trees: new THREE.Group(), cars: new THREE.Group(), neighbors: new THREE.Group(), limits: new THREE.Group(), people: new THREE.Group(), terrace169: new THREE.Group() };
   const root = new THREE.Group();
   Object.values(groups).forEach((g) => root.add(g));
   scene.add(root);
@@ -210,23 +210,34 @@ export function buildSite(M, scene) {
   const [lx, lz] = w2(4.6, 40); lbl.position.set(lx, 0.03, lz); root.add(lbl);
 
   // les pavés gazon s'arrêtent à la limite est de la parcelle (segment E2–E3 longeant l'accès)
+  // et au bord de la rue de la Mairie (limite ouest au droit de l'accès)
   {
-    const [ax, az] = w2(25.01, 22.299), [bx, bz] = w2(23.281, 36.161), [ix, iz] = w2(15, 30);
-    const n = new THREE.Vector3(bz - az, 0, -(bx - ax)).normalize();
-    if (n.x * (ix - ax) + n.z * (iz - az) < 0) n.negate();          // normale vers l'intérieur
-    M.grassPaver.clippingPlanes = [new THREE.Plane(n, -(n.x * ax + n.z * az))];
+    const [ix, iz] = w2(15, 30);
+    const inner = (a, b) => {
+      const [ax, az] = w2(...a), [bx, bz] = w2(...b);
+      const n = new THREE.Vector3(bz - az, 0, -(bx - ax)).normalize();
+      if (n.x * (ix - ax) + n.z * (iz - az) < 0) n.negate();        // normale vers l'intérieur
+      return new THREE.Plane(n, -(n.x * ax + n.z * az));
+    };
+    M.grassPaver.clippingPlanes = [inner([25.01, 22.299], [23.281, 36.161]), inner([9.681, 19.544], [8.643, 28.556])];
   }
   // accès en pavés gazon + places de parc
   const acc = new THREE.Mesh(ribbon(SCENARIO.route.pts, SCENARIO.route.width, 0.02), M.grassPaver);
   acc.receiveShadow = true; root.add(acc);
+  // P5 + P6 : un seul pavage continu (voir SCENARIO.paved56)
+  const p56 = new THREE.Mesh(flatPoly(SCENARIO.paved56, 0.03), M.pavedEast);
+  p56.receiveShadow = true; root.add(p56);
   for (const p of SCENARIO.parkings) {
-    const m = box(p.w, 0.05, p.h, p.paved ? M.pavedEast : M.grassPaver);
-    const [x, z] = w2(p.x, p.y); m.position.set(x, 0.0, z); m.rotation.y = -p.rot * D2R; m.castShadow = false;
-    root.add(m);
+    const [x, z] = w2(p.x, p.y);
+    if (!p.paved) {
+      const m = box(p.w, 0.05, p.h, M.grassPaver);
+      m.position.set(x, 0.0, z); m.rotation.y = -p.rot * D2R; m.castShadow = false;
+      root.add(m);
+    }
     const t = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: labelTexture(p.label, { w: 256, h: 128, font: '700 90px Archivo, Arial, sans-serif', color: 'rgba(255,255,255,.8)' }), transparent: true, depthWrite: false }));
     t.rotation.set(-Math.PI / 2, 0, -p.rot * D2R); t.position.set(x, 0.04, z + 1.6); root.add(t);
   }
-  // terrasse de la maison 169 : en hauteur, au niveau du 1er étage, sur deux piliers bois
+  // terrasse de la maison 169 : en hauteur, au niveau du 1er étage, sur deux piliers bois (masquable)
   {
     const p = SCENARIO.terrace169, hw = p.w / 2, hd = p.h / 2, top = 2.8;
     const t = new THREE.Group();
@@ -243,7 +254,8 @@ export function buildSite(M, scene) {
       { a: [hw - 0.03, hd - 0.03, top], b: [hw - 0.03, -hd, top] },
     ], M.metal));
     t.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-    groups.neighbors.add(t);
+    groups.terrace169.add(t);
+    groups.neighbors.add(groups.terrace169);
   }
   // abords pavés de la maison 169 : tout le côté est jusqu'à la limite, et au sud, de la rue
   // jusqu'à la limite est. Au sud, le bord suit l'alignement des places P5/P6 (largeur variable
@@ -305,8 +317,8 @@ export function buildSite(M, scene) {
   place('birch', 21.4, 45.8, 8);          // bouleau, coin sud-est
   place('shrub', 16.5, 47.4, 1.4);
   place('shrub', 12.5, 48.6, 1.2);
-  // lignée d'arbres au nord de l'accès : limite entre ancienne et nouvelle maison
-  for (let i = 0; i < 4; i++) place('deciduous', 16.4 + i * 2.1, 23.45 + i * 0.11, 5.2 + r() * 0.8);
+  // lignée d'arbres au nord de l'accès : limite entre ancienne et nouvelle maison (à l'est de P6)
+  for (let i = 0; i < 4; i++) place('deciduous', 17.8 + i * 1.85, 23.55 + i * 0.1, 5.2 + r() * 0.8);
   // petits arbres dans la pelouse au sud de la maison 169
   place('deciduous', 18.0, 21.3, 3.6);
   place('birch', 24.3, 21.0, 4.2);

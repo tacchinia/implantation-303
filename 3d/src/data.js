@@ -21,8 +21,12 @@ export const SCENARIO = {
   route: { pts: [[8.4, 26.15], [10.48, 26.26], [13.18, 26.41], [16.71, 26.67], [19.63, 26.92], [23.45, 27.29], [22.92, 33.38]], width: 5 },
   parkings: [
     { x: 22.12, y: 32.24, rot: 364.5, w: 2.7, h: 5, label: 'P4' },
-    { x: 11.23, y: 21.3, rot: 3, w: 2.7, h: 5, label: 'P5', paved: true },
-    { x: 14.08, y: 21.39, rot: 3, w: 2.7, h: 5, label: 'P6', paved: true },
+    // P5/P6 décalées vers l'est (+1,3 m) pour une bande verte de 1,5 m le long de la rue
+    { x: 12.53, y: 21.37, rot: 3, w: 2.7, h: 5, label: 'P5', paved: true },
+    { x: 15.38, y: 21.46, rot: 3, w: 2.7, h: 5, label: 'P6', paved: true },
   ],
+  // pavage continu de P5 + P6 : au nord l'alignement des abords pavés de la maison 169, à l'ouest
+  // une parallèle à la rue à 1,5 m (bande verte de largeur régulière, comme à l'ouest du nouveau bâtiment)
+  paved56: [[11.276, 18.807], [16.859, 19.034], [16.597, 24.027], [13.901, 23.886], [13.747, 23.937], [11.051, 23.796], [10.703, 23.778]],
   terrace169: { x: 21.27, y: 18.03, rot: 2, w: 3, h: 3 },
 };

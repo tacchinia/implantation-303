@@ -9,6 +9,9 @@ import { SCENARIO } from './data.js';
 const D2R = Math.PI / 180;
 const $ = (id) => document.getElementById(id);
 const isSmall = () => window.matchMedia('(max-width: 760px)').matches;
+// panneau de réglages masqué par défaut : l'afficher avec ?reglages dans l'URL
+const SHOW_CONTROLS = new URLSearchParams(location.search).has('reglages');
+if (!SHOW_CONTROLS) $('panel').hidden = true;
 
 // ─── rendu ────────────────────────────────────────────────────────────────
 const stage = $('stage');
@@ -160,12 +163,18 @@ const B = SCENARIO.building;
   const floor = new THREE.Mesh(new THREE.BoxGeometry(W + 0.4, 0.06, 5.5), M.carportFloor);
   floor.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 5.5 : W + 0.4); });
   floor.position.set(W / 2, 0.0, -0.55 + 2.75); floor.receiveShadow = true; house.group.add(floor);
-  const path = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.06, 13.3), M.slab);
-  path.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 13.3 : 1.6); });
-  path.position.set(-0.8, 0.0, 2.3 + 6.65); path.receiveShadow = true; house.group.add(path);
-  const terr = new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.08, 2.4), M.slab);
-  terr.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 2.4 : 7.4); });
-  terr.position.set(3.9, 0.0, LEN + 1.2); terr.receiveShadow = true; house.group.add(terr);
+  // dallage : passage le long de la façade ouest, depuis les pavés gazon de l'accès (pied de l'escalier
+  // compris) jusqu'au sud, puis terrasse sud d'un seul tenant jusqu'au droit de la grande baie vitrée.
+  // UV en coordonnées locales : le calepinage se raccorde entre les deux surfaces.
+  const slab = (u0, u1, v0, v1, th) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(u1 - u0, th, v1 - v0), M.slab);
+    m.position.set((u0 + u1) / 2, 0.0, (v0 + v1) / 2);
+    const pos = m.geometry.attributes.position, uv = m.geometry.attributes.uv;
+    for (let i = 0; i < pos.count; i++) uv.setXY(i, pos.getX(i) + m.position.x, -(pos.getZ(i) + m.position.z));
+    m.receiveShadow = true; house.group.add(m);
+  };
+  slab(-1.6, 0, -0.1, LEN, 0.05);
+  slab(-1.6, 4.6, LEN, LEN + 2.4, 0.08);
   // voitures sous le couvert + P4
   const colors = ['#8a9096', '#1f2d44', '#e8e6e1'];
   [1.55, 4.5, 7.45].forEach((u, i) => { const c = site.makeCar(colors[i]); c.position.set(u, 0, 2.35); site.groups.cars.add(c); c.userData.local = true; });
@@ -199,9 +208,11 @@ const FINISHES = [
   { id: 'larch', name: 'Mélèze' },
   ...Object.entries(TX.STONES).map(([id, s]) => ({ id, name: s.name })),
 ];
+// par défaut : mélèze à l'étage sur la façade sud, la façade ouest côté balcon et le décrochement ouest
+const DEFAULT_LARCH = ['S_up', 'W_up_S', 'W_up_R'];
 const FIN_NAME = Object.fromEntries(FINISHES.map((f) => [f.id, f.name]));
 const finMat = (id) => (id === 'larch' ? M.larch : M['stone_' + id]);
-const cladState = Object.fromEntries(Object.values(FACADES).flatMap((f) => f.keys).filter(Boolean).map((k) => [k, k === 'W_up_S' ? 'larch' : 'render']));
+const cladState = Object.fromEntries(Object.values(FACADES).flatMap((f) => f.keys).filter(Boolean).map((k) => [k, DEFAULT_LARCH.includes(k) ? 'larch' : 'render']));
 const facadesEl = $('facades');
 const toggles = {};
 const optionsHtml = FINISHES.map((f) => `<option value="${f.id}">${f.name}</option>`).join('');
@@ -304,13 +315,14 @@ function pick(e) {
   return hit && hit.object.userData.key ? hit.object.userData.key : null;
 }
 renderer.domElement.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
-renderer.domElement.addEventListener('pointerup', (e) => {
+// sans les réglages, la vue reste en consultation seule (pas de changement de parement au clic)
+if (SHOW_CONTROLS) renderer.domElement.addEventListener('pointerup', (e) => {
   if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) { down = null; return; }
   down = null;
   const key = pick(e);
   if (key) { setClad(key, nextFinish(cladState[key])); showTip(e, key); }
 });
-renderer.domElement.addEventListener('pointermove', (e) => {
+if (SHOW_CONTROLS) renderer.domElement.addEventListener('pointermove', (e) => {
   if (e.pointerType !== 'mouse' || e.buttons) { tip.hidden = true; return; }
   const key = pick(e);
   hoverKey = key;
@@ -370,6 +382,8 @@ bindShow('showCars', site.groups.cars);
 bindShow('showNeighbors', site.groups.neighbors);
 bindShow('showLimits', site.groups.limits);
 bindShow('showPeople', site.groups.people);
+bindShow('showTerrace169', site.groups.terrace169);
+site.groups.terrace169.visible = $('showTerrace169').checked;
 $('autumn').addEventListener('change', (e) => {
   const pal = e.target.checked ? FOLIAGE.autumn : FOLIAGE.summer;
   M.foliage.forEach((m, i) => m.color.set(pal[i]));

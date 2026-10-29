@@ -57,12 +57,14 @@ function wallMatrix(dir, face) {
   return m;
 }
 
-// extend : débord du bardage aux angles ; noExt : extrémités ('lo'/'hi') sans débord (joint entre deux parties)
-function wallShape(outline, holes, extend = 0, noExt = []) {
+// extend : débord du bardage aux angles ; noExt : extrémités ('lo'/'hi') sans débord (joint entre deux parties) ;
+// inset : extrémités logées derrière un mur perpendiculaire, le bardage va jusqu'au nu de ce mur (épaisseur T)
+function wallShape(outline, holes, extend = 0, noExt = [], inset = []) {
   let pts = outline;
   if (extend) {
     const sMin = Math.min(...outline.map((p) => p[0])), sMax = Math.max(...outline.map((p) => p[0]));
-    const lo = noExt.includes('lo') ? 0 : extend, hi = noExt.includes('hi') ? 0 : extend;
+    const ext = (end) => (noExt.includes(end) ? 0 : inset.includes(end) ? T : extend);
+    const lo = ext('lo'), hi = ext('hi');
     pts = outline.map(([s, h]) => [s === sMin ? s - lo : s === sMax ? s + hi : s, h]);
   }
   const shape = new THREE.Shape(pts.map(([s, h]) => new THREE.Vector2(s, h)));
@@ -88,16 +90,17 @@ const rect = (s0, s1, h0, h1) => [[s0, h0], [s1, h0], [s1, h1], [s0, h1]];
 export const WALLS = [
   // REZ
   { key: 'S_rdc', dir: 'S', face: LEN, outline: rect(0, W, 0, L1),
-    holes: [{ s: [1.4, 4.17], h: [0, 2.1], t: 'slide' }, { s: [5.97, 7.76], h: [0, 2.1], t: 'slide' }] },
+    // grande baie vitrée du séjour ; fenêtre de la chambre à allège ≈ 0,95 m
+    holes: [{ s: [1.4, 4.17], h: [0, 2.1], t: 'slide' }, { s: [5.97, 7.76], h: [0.95, 2.1], t: 'win', leaves: 2 }] },
   { key: 'N_rdc', dir: 'N', face: 4.8, outline: rect(0, W, 0, L1),
     holes: [{ s: [6.1, 6.95], h: [0, 2.1], t: 'door' }, { s: [7.5, 8.1], h: [1.5, 2.1], t: 'vent' }] },
   // façade ouest du rez, en deux parties : gauche (nord) jusqu'au décrochement du balcon (v = 7,7), droite (sud)
-  { key: 'W_rdc_N', dir: 'W', face: 0, outline: rect(4.8 + T, 7.7, 0, L1), noExt: ['hi'],
+  { key: 'W_rdc_N', dir: 'W', face: 0, outline: rect(4.8 + T, 7.7, 0, L1), noExt: ['hi'], inset: ['lo'],
     holes: [{ s: [6.2, 6.75], h: [1.35, 1.95], t: 'vent' }] },
-  { key: 'W_rdc_S', dir: 'W', face: 0, outline: rect(7.7, LEN - T, 0, L1), noExt: ['lo'],
+  { key: 'W_rdc_S', dir: 'W', face: 0, outline: rect(7.7, LEN - T, 0, L1), noExt: ['lo'], inset: ['hi'],
     holes: [{ s: [7.73, 8.65], h: [0, 2.15], t: 'door' },
       { s: [9.8, 10.8], h: [1.2, 2.15], t: 'win' }, { s: [12.5, 13.6], h: [0, 2.15], t: 'slide' }] },
-  { key: 'E_rdc', dir: 'E', face: W, outline: rect(T, LEN - 4.8 - T, 0, L1),
+  { key: 'E_rdc', dir: 'E', face: W, outline: rect(T, LEN - 4.8 - T, 0, L1), inset: ['lo', 'hi'],
     holes: [{ s: [4.3, 5.0], h: [1.3, 2.2], t: 'win' }, { s: [6.8, 7.9], h: [1.1, 2.2], t: 'win' }] },
   // ÉTAGE
   { key: 'N_up', dir: 'N', face: 1.1,
@@ -106,13 +109,13 @@ export const WALLS = [
   { key: 'S_up', dir: 'S', face: LEN,
     outline: [[2.07, L1], [W, L1], [W, he(W)], [US, he(US)], [US, hw(US)], [2.07, hw(2.07)]],
     holes: [{ s: [3.1, 4.3], h: [3.85, 5.0], t: 'win' }, { s: [5.87, 7.8], h: [3.85, 5.0], t: 'win' }] },
-  { key: 'E_up', dir: 'E', face: W, outline: rect(T, LEN - 1.1 - T, L1, he(W)),
+  { key: 'E_up', dir: 'E', face: W, outline: rect(T, LEN - 1.1 - T, L1, he(W)), inset: ['lo', 'hi'],
     holes: [{ s: [0.94, 2.23], h: [3.95, 5.2], t: 'win' }, { s: [3.45, 4.75], h: [3.95, 5.2], t: 'win' },
       { s: [6.16, 8.04], h: [3.95, 5.2], t: 'win' }, { s: [9.55, 10.4], h: [3.95, 5.2], t: 'win' }] },
-  { key: 'W_up_N', dir: 'W', face: 0, outline: [[1.1 + T, L1], [7.7 - T, L1], [7.7 - T, hw(0)], [1.1 + T, hw(0)]],
+  { key: 'W_up_N', dir: 'W', face: 0, outline: [[1.1 + T, L1], [7.7 - T, L1], [7.7 - T, hw(0)], [1.1 + T, hw(0)]], inset: ['lo', 'hi'],
     holes: [{ s: [3.0, 4.2], h: [3.9, 5.1], t: 'win' }, { s: [4.6, 5.9], h: [3.9, 5.1], t: 'win' }] },
   { key: 'W_up_R', dir: 'S', face: 7.7, outline: [[0, L1], [2.07, L1], [2.07, hw(2.07)], [0, hw(0)]], holes: [] },
-  { key: 'W_up_S', dir: 'W', face: 2.07, outline: [[7.7, L1], [LEN - T, L1], [LEN - T, hw(2.07)], [7.7, hw(2.07)]],
+  { key: 'W_up_S', dir: 'W', face: 2.07, outline: [[7.7, L1], [LEN - T, L1], [LEN - T, hw(2.07)], [7.7, hw(2.07)]], inset: ['hi'],
     holes: [{ s: [8.45, 9.4], h: [L1, 5.0], t: 'door' }, { s: [10.8, 13.85], h: [L1, 5.05], t: 'slide' }] },
 ];
 
@@ -148,7 +151,7 @@ export function buildHouse(M) {
     mesh.userData.key = w.key;
     g.add(mesh); pickables.push(mesh);
     // bardage mélèze (même découpe, posé devant le mur)
-    const cg = new THREE.ExtrudeGeometry(wallShape(w.outline, w.holes, CLAD, w.noExt), { depth: CLAD, bevelEnabled: false });
+    const cg = new THREE.ExtrudeGeometry(wallShape(w.outline, w.holes, CLAD, w.noExt, w.inset), { depth: CLAD, bevelEnabled: false });
     cg.applyMatrix4(mtx);
     const cm = new THREE.Mesh(cg, M.larch);
     cm.castShadow = cm.receiveShadow = true;
@@ -281,7 +284,7 @@ function addOpening(g, o, M) {
   g.add(box(w, f, d, M.frame, cx, h0 + f / 2, z));
   const glass = new THREE.Mesh(new THREE.PlaneGeometry(w - 2 * f, h - 2 * f), M.glass);
   glass.position.set(cx, cy, z); g.add(glass);
-  const leaves = o.t === 'slide' ? Math.max(2, Math.round(w / 1.4)) : Math.max(1, Math.min(3, Math.round(w / 0.55)));
+  const leaves = o.leaves || (o.t === 'slide' ? Math.max(2, Math.round(w / 1.4)) : Math.max(1, Math.min(3, Math.round(w / 0.55))));
   for (let i = 1; i < leaves; i++) g.add(box(0.06, h - 2 * f, d, M.frame, s0 + (w * i) / leaves, cy, z));
   if (o.t === 'win') {
     // tablette alu
