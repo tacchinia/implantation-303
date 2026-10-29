@@ -26,7 +26,8 @@ export const SCENARIO = {
     { x: 15.38, y: 21.46, rot: 3, w: 2.7, h: 5, label: 'P6', paved: true },
   ],
   // pavage continu de P5 + P6 : au nord l'alignement des abords pavés de la maison 169, à l'ouest
-  // une parallèle à la rue à 1,5 m (bande verte de largeur régulière, comme à l'ouest du nouveau bâtiment)
-  paved56: [[11.276, 18.807], [16.859, 19.034], [16.597, 24.027], [13.901, 23.886], [13.747, 23.937], [11.051, 23.796], [10.703, 23.778]],
+  // une parallèle à la rue à 1,5 m (bande verte de largeur régulière, comme à l'ouest du nouveau bâtiment),
+  // au sud un bord droit qui passe sur les pavés gazon de l'accès (pas d'herbe entre les deux)
+  paved56: [[11.276, 18.807], [16.859, 19.034], [16.581, 24.309], [10.677, 24.0]],
   terrace169: { x: 21.27, y: 18.03, rot: 2, w: 3, h: 3 },
 };

@@ -58,8 +58,9 @@ const M = {
   door: std({ color: '#33373b', roughness: 0.5, metalness: 0.2 }),
   metal: std({ color: '#3a3e42', roughness: 0.45, metalness: 0.6 }),
   glass: new THREE.MeshPhysicalMaterial({ color: '#27363f', roughness: 0.04, metalness: 0.1, envMapIntensity: 1.4, side: THREE.DoubleSide }),
-  grass: std({ map: TX.grassTexture(), roughness: 1 }),
-  grassPaver: std({ map: TX.grassPaverTexture(), roughness: 0.95, side: THREE.DoubleSide }),
+  grass: std({ map: TX.grassTexture(), roughness: 1, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 8 }),
+  // décalages de profondeur : pelouse < pavés gazon < pavés et dallages (pas de scintillement aux recouvrements)
+  grassPaver: std({ map: TX.grassPaverTexture(), roughness: 0.95, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 4 }),
   asphalt: std({ map: TX.asphaltTexture(), roughness: 0.9 }),
   curb: std({ color: '#b9b6ae', roughness: 0.9, side: THREE.DoubleSide }),
   carportFloor: std({ map: TX.paverTexture(), roughness: 0.9 }),
@@ -173,7 +174,7 @@ const B = SCENARIO.building;
     for (let i = 0; i < pos.count; i++) uv.setXY(i, pos.getX(i) + m.position.x, -(pos.getZ(i) + m.position.z));
     m.receiveShadow = true; house.group.add(m);
   };
-  slab(-1.6, 0, -0.1, LEN, 0.05);
+  slab(-1.6, 0, -0.55, LEN, 0.05);                 // bord nord aligné sur celui du sol du couvert
   slab(-1.6, 4.6, LEN, LEN + 2.4, 0.08);
   // voitures sous le couvert + P4
   const colors = ['#8a9096', '#1f2d44', '#e8e6e1'];
