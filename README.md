@@ -39,6 +39,10 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
 
 Paramètres d'adresse (combinables avec `&`) :
 
+- **`?implantation=actuelle`** revient à l'implantation d'origine (6,32 m à l'axe de la rue, non
+  conforme) ; par défaut, implantation **conforme** au retrait de 8 m à l'axe : maison décalée de
+  1,70 m vers l'est et 0,40 m vers le nord, servitude de distance chez les voisins 999 et 292 en
+  orange au sol (calque des limites). Sélecteur « Implantation » dans le panneau ;
 - **`?reglages`** affiche le panneau de réglages, masqué par défaut (vue en consultation seule) ;
 - **`?places=est`** ou **`?places=ouest`** (défaut) choisit la variante des places P5/P6, aussi
   modifiable dans le panneau. Exemple de lien sans réglages : `maison-303-3d.html?places=est`.
@@ -49,8 +53,15 @@ Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.h
 
 - Fond cadastral géoréférencé embarqué (échelle calibrée 0.0373336 m/px, plan ≈ 1:500).
 - Zone constructible et bande de retrait de 3 m (limites sud / ouest / est) précalculées.
-- Bâtiment déplaçable et pivotable, avec aimantation sur les angles des limites et sur
-  le retrait de 3 m côté ouest.
+- Bâtiment déplaçable et pivotable, avec aimantation sur les angles des limites, sur
+  le retrait de 3 m côté ouest et sur le retrait de 8 m à l'axe de la rue.
+- **Retrait de 8 m à l'axe de la rue** (axe = milieu de la chaussée, trottoir exclu) :
+  carte dédiée avec la case « Implantation conforme » (cochée par défaut ;
+  `?implantation=actuelle` pour l'implantation d'origine). Bâtiment conforme : +1,70 m vers
+  l'est, +0,40 m vers le nord. **Servitude de distance** chez les voisins 999 et 292
+  (bande orange sur le plan) : distance achetée (3 m − distance à la limite) et surface, en
+  direct et par voisin — 1,63 m, 12,1 + 12,2 = 24,2 m² dans la position conforme. Les places
+  chevauchées par le bâtiment (P4) sont signalées.
 - **Distances vivantes** aux limites, recalculées en continu et affichées en rouge
   lorsqu'elles descendent sous 3 m.
 - Dimensions du bâtiment simulables (largeur / longueur).

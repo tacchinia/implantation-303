@@ -17,8 +17,31 @@ export const GEO = {
   road_w: [[5.64, 0.0], [4.52, 8], [3.36, 16], [2.76, 20], [2.2, 24], [1.75, 28], [1.49, 32], [1.27, 36], [1.12, 40], [0.97, 44], [0.97, 46], [1.01, 48], [1.12, 50], [1.23, 52], [1.46, 54], [1.64, 55.18]],
 };
 
+// Implantation du bâtiment (rectangle 9,0 × 15,3 m, rotation 4,25°) :
+// · conforme (défaut) : retrait de 8 m à l'axe de la chaussée de la rue de la Mairie (trottoir ouest
+//   exclu) ; bâtiment déplacé de 1,70 m vers l'est et 0,405 m vers le nord pour garder 3 m au sud ;
+//   1,37 m à la limite est → servitude de distance de 1,63 m chez les voisins 999 et 292 ;
+// · actuelle (?implantation=actuelle) : position d'origine, 6,32 m à l'axe (non conforme).
+// Même calcul que l'outil d'implantation (BUILDING_PRESETS).
+export const IMPLANTATIONS = {
+  conforme: { name: 'Conforme (8 m à l\u2019axe)', x: 13.455, y: 28.516, rot: 4.25 },
+  actuelle: { name: 'Actuelle', x: 11.755, y: 28.921, rot: 4.25 },
+};
+export const IMPLANTATION =
+  (typeof location !== 'undefined' && new URLSearchParams(location.search).get('implantation') === 'actuelle') ? 'actuelle' : 'conforme';
+
+// servitude de distance (implantation conforme) : terrain des voisins à moins de 3 m du bâtiment,
+// coupé à la limite mitoyenne 999/292 (y = 36,161) ; ≈ 12,1 m² (999) + 12,2 m² (292)
+export const SERVITUDE = {
+  conforme: [
+    [[24.429, 26.954], [23.281, 36.161], [24.92, 36.161], [25.422, 29.405], [25.42, 28.935], [25.344, 28.47], [25.197, 28.023], [24.981, 27.604], [24.703, 27.225]],
+    [[23.281, 36.161], [23.364, 46.604], [23.586, 46.379], [23.861, 45.997], [24.073, 45.577], [24.217, 45.129], [24.288, 44.663], [24.92, 36.161]],
+  ],
+  actuelle: [],
+};
+
 export const SCENARIO = {
-  building: { x: 11.755, y: 28.921, rot: 4.25, w: 9.0, len: 15.3 },
+  building: { ...IMPLANTATIONS[IMPLANTATION], w: 9.0, len: 15.3 },
   // route d'accès en pavés gazon (largeur 5 m) ; premier point prolongé jusqu'à la rue
   route: { pts: [[8.4, 26.15], [10.48, 26.26], [13.18, 26.41], [16.71, 26.67], [19.63, 26.92], [23.45, 27.29], [22.92, 33.38]], width: 5 },
   parkings: [
