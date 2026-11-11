@@ -21,8 +21,9 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
   jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
 - teintes d'enduit, de toiture et de menuiseries ;
 - rue de la Mairie relevée sur le cadastre (chaussée jusqu'à la bordure du trottoir ouest, trottoir jusqu'à
-  la limite de la parcelle de la rue), accès (arrêté au bord de la rue) et place P4 en **pavés gazon**, places P5/P6 en pavage
-  continu, avec deux voitures témoins, selon deux variantes : **ouest** (actuelle, le plus à l'ouest possible
+  la limite de la parcelle de la rue), accès (arrêté au bord de la rue) en **pavés gazon**, places P4/P5/P6
+  avec trois voitures témoins, selon deux variantes (P4 au nord du bout est de l'accès, en pavés gazon, en variante
+  ouest ; à l'ouest de P5, dans le pavage, en variante est) : **ouest** (actuelle, le plus à l'ouest possible
   juste à côté de la zone de visibilité de l'accès, passage piéton de 1,2 m entre P5 et P6 dans l'axe de la porte
   de l'ancienne maison, gazon entre la haie et P5) ou **est** (le long de la limite est, au sud de l'ancienne maison, accès pavé depuis les pavés gazon ;
   la verdure passe à l'ouest, en gazon jusqu'à la haie) ; limites de parcelle, voisins
@@ -61,7 +62,7 @@ Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.h
   l'est, +0,40 m vers le nord. **Servitude de distance** chez les voisins 999 et 292
   (bande orange sur le plan) : distance achetée (3 m − distance à la limite) et surface, en
   direct et par voisin — 1,63 m, 12,1 + 12,2 = 24,2 m² dans la position conforme. Les places
-  chevauchées par le bâtiment (P4) sont signalées.
+  chevauchées par le bâtiment sont signalées (P4 a été déplacée au nord de l'accès).
 - **Distances vivantes** aux limites, recalculées en continu et affichées en rouge
   lorsqu'elles descendent sous 3 m.
 - Dimensions du bâtiment simulables (largeur / longueur).

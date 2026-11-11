@@ -250,23 +250,22 @@ export function buildSite(M, scene) {
     const t = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: labelTexture(p.label, { w: 256, h: 128, font: '700 90px Archivo, Arial, sans-serif', color: 'rgba(255,255,255,.8)' }), transparent: true, depthWrite: false }));
     t.rotation.set(-Math.PI / 2, 0, -p.rot * D2R); t.position.set(x, 0.04, z + 1.6); parent.add(t);
   };
-  for (const p of SCENARIO.parkings) {
-    const [x, z] = w2(p.x, p.y);
-    const m = box(p.w, 0.05, p.h, M.grassPaver);
-    m.position.set(x, 0.0, z); m.rotation.y = -p.rot * D2R; m.castShadow = false;
-    root.add(m); parkLabel(p, root);
-  }
-  // P5 + P6 : une implantation par variante (SCENARIO.p56), pavage continu, voitures témoins ;
+  // P4 + P5 + P6 : une implantation par variante (SCENARIO.p56), pavage continu, voitures témoins ;
   // arbres et voitures rangés aussi dans groups.trees / groups.cars pour les cases d'affichage
   const layouts = {};
-  const witness = ['#5c6b4c', '#c7c2b6'];
+  const witness = ['#5c6b4c', '#c7c2b6', '#7a2e2a'];
   for (const [id, L] of Object.entries(SCENARIO.p56)) {
     const g = { ground: new THREE.Group(), trees: new THREE.Group(), cars: new THREE.Group() };
     root.add(g.ground); groups.trees.add(g.trees); groups.cars.add(g.cars);
     for (const poly of L.paved) {
       const m = new THREE.Mesh(flatPoly(poly, 0.03), M.pavedEast); m.receiveShadow = true; g.ground.add(m);
     }
-    L.places.forEach((p, i) => {
+    if (L.p4.grass) {                                        // P4 isolée : dalle en pavés gazon
+      const [x, z] = w2(L.p4.x, L.p4.y);
+      const m = box(L.p4.w, 0.05, L.p4.h, M.grassPaver);
+      m.position.set(x, 0.0, z); m.rotation.y = -L.p4.rot * D2R; m.receiveShadow = true; g.ground.add(m);
+    }
+    [...L.places, L.p4].forEach((p, i) => {
       parkLabel(p, g.ground);
       const c = makeCar(M, witness[i]); const [x, z] = w2(p.x, p.y);
       c.position.set(x, 0, z); c.rotation.y = -p.rot * D2R; g.cars.add(c);  // garée en marche avant
@@ -364,7 +363,7 @@ export function buildSite(M, scene) {
     }
     if (distPolyline(p, SCENARIO.route.pts) < SCENARIO.route.width / 2 + margin * 0.6) return true;
     if (pointInPoly(p, [...rw, ...re.slice().reverse()]) || distPolyline(p, rw) < 1.2 || distPolyline(p, re) < 1.2) return true;
-    for (const k of [...SCENARIO.parkings, ...SCENARIO.p56.ouest.places]) if (Math.hypot(p[0] - k.x, p[1] - k.y) < 3.5 + margin * 0.3) return true;
+    for (const k of [...SCENARIO.p56.ouest.places, ...Object.values(SCENARIO.p56).map((v) => v.p4)]) if (Math.hypot(p[0] - k.x, p[1] - k.y) < 3.5 + margin * 0.3) return true;
     return false;
   };
 
@@ -382,9 +381,10 @@ export function buildSite(M, scene) {
   // à l'est de P6) et petits arbres dans la pelouse au sud de la maison 169
   {
     const T = layouts.ouest.trees;
-    for (let i = 0; i < 3; i++) place('deciduous', 20.1 + i * 2.0, 23.6 + i * 0.1, 5.2 + r() * 0.8, T);
-    place('deciduous', 21.6, 21.0, 3.6, T);
-    place('birch', 24.3, 21.0, 4.2, T);
+    // (P4 au bout est de l'accès : un arbre de la lignée entre P6 et P4, un bouleau à l'est de P4)
+    place('deciduous', 19.5, 23.55, 5.2 + r() * 0.8, T);
+    place('deciduous', 19.55, 21.0, 3.6, T);
+    place('birch', 24.95, 20.6, 4.2, T);
   }
   // zone de visibilité nord : arbuste bas (≤ 0,60 m) à la place de l'ancien petit arbre
   {
@@ -407,9 +407,10 @@ export function buildSite(M, scene) {
   // (générateur séparé : le semis ci-dessus reste identique d'une variante à l'autre)
   {
     const T = layouts.est.trees, r2 = rng(304);
-    for (let i = 0; i < 4; i++) place('deciduous', 13.6 + i * 1.75, 23.35 + i * 0.09, 5.2 + r2() * 0.8, T, r2);
+    // (P4 à l'ouest de P5 : la lignée s'arrête avant l'entrée de P4, bouleau déplacé vers l'ouest)
+    for (let i = 0; i < 2; i++) place('deciduous', 13.6 + i * 1.75, 23.35 + i * 0.09, 5.2 + r2() * 0.8, T, r2);
     place('deciduous', 15.6, 20.6, 3.6, T, r2);
-    place('birch', 18.4, 20.5, 4.2, T, r2);
+    place('birch', 13.2, 20.7, 4.2, T, r2);
   }
   // limite sud : muret de 30 cm de haut, 15 cm de large (côté intérieur de la limite)
   {
