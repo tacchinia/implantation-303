@@ -1,6 +1,6 @@
 // Terrain, voirie, voisins, végétation, voitures.
 import * as THREE from 'three';
-import { GEO, SCENARIO } from './data.js';
+import { GEO, SCENARIO, SERVITUDE, IMPLANTATION } from './data.js';
 import { rng, labelTexture } from './textures.js';
 import { box, boxUV, railings } from './house.js';
 
@@ -314,6 +314,15 @@ export function buildSite(M, scene) {
   groups.limits.add(lim);
   for (const p of GEO.parcel303) {
     const [x, z] = w2(...p); groups.limits.add(box(0.12, 0.25, 0.12, M.limitPost, x, 0.12, z));
+  }
+  // servitude de distance chez les voisins 999 et 292 (implantation conforme) : bande orange au sol
+  {
+    const fill = new THREE.MeshBasicMaterial({ color: '#f97316', transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false });
+    const edge = new THREE.MeshBasicMaterial({ color: '#c2410c', transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
+    for (const z of SERVITUDE[IMPLANTATION] || []) {
+      const a = new THREE.Mesh(flatPoly(z, 0.065), fill), b = new THREE.Mesh(ribbon(z, 0.06, 0.07, true), edge);
+      a.renderOrder = b.renderOrder = 2; groups.limits.add(a, b);
+    }
   }
 
   // zones de visibilité de l'accès (masquées par défaut) : triangles au sol et lignes de visibilité

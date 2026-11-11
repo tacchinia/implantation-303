@@ -4,7 +4,7 @@ import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import * as TX from './textures.js';
 import { buildHouse, FACADES, KEY_LABEL, W, LEN } from './house.js';
 import { buildSite, w2, FOLIAGE } from './site.js';
-import { SCENARIO } from './data.js';
+import { SCENARIO, IMPLANTATIONS, IMPLANTATION } from './data.js';
 
 const D2R = Math.PI / 180;
 const $ = (id) => document.getElementById(id);
@@ -402,6 +402,24 @@ bindShow('showVisibility', site.groups.visibility);
     seg.appendChild(b);
   }
   set(cur);
+}
+// implantation du bâtiment : conforme (défaut) ou ?implantation=actuelle ; la maquette étant
+// construite au chargement, le sélecteur recharge la page avec le paramètre (autres paramètres conservés)
+{
+  const seg = $('impl');
+  for (const [id, I] of Object.entries(IMPLANTATIONS)) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.v = id; b.textContent = I.name;
+    b.setAttribute('aria-pressed', String(id === IMPLANTATION));
+    b.addEventListener('click', () => {
+      if (id === IMPLANTATION) return;
+      const q = new URLSearchParams(location.search);
+      if (id === 'conforme') q.delete('implantation'); else q.set('implantation', id);
+      const qs = q.toString().replace(/=(&|$)/g, '$1');      // ?reglages sans « = »
+      location.search = qs ? '?' + qs : '';
+    });
+    seg.appendChild(b);
+  }
 }
 site.groups.terrace169.visible = $('showTerrace169').checked;
 $('autumn').addEventListener('change', (e) => {
