@@ -171,9 +171,11 @@ source d'information.
      la limite, coupée à la mitoyenne 999/292 (y = 36.161) ; profondeur =
      3 m − distance à la portion de limite de chaque voisin. Position
      conforme : 1.63 m ; 12.1 m² (999) + 12.2 m² (292) = 24.2 m².
-   · Les places/terrasses/zones chevauchées par le bâtiment sont signalées
-     (P4 à l'est du bâtiment dans la position conforme, laissée en place
-     en attendant un repositionnement).
+   · Les places/terrasses/zones chevauchées par le bâtiment sont signalées.
+     P4, qui était à l'est du bâtiment (chevauchée dans la position
+     conforme), est déplacée au nord du bout est de l'accès (x 22.35,
+     y 22.2, rot 3°) ; la branche sud de l'accès qui la desservait est
+     supprimée du scénario « 6 places avec route ».
    · Aimantation à 8 m de l'axe pendant le drag (±35 cm, case dans
      Calques, Alt pour ignorer), prioritaire sur celle des 3 m ouest.
    · GEO.road_w remplacé par le relevé fin du bord ouest de la chaussée
@@ -556,9 +558,9 @@ const EMBEDDED_SCENARIOS = [
    {
     "id": "p4",
     "type": "parking",
-    "x": 22.12,
-    "y": 32.24,
-    "rot": 364.5,
+    "x": 22.35,
+    "y": 22.2,
+    "rot": 3,
     "w": 2.7,
     "h": 5,
     "label": "P4",
@@ -597,10 +599,6 @@ const EMBEDDED_SCENARIOS = [
      [
       23.45,
       27.29
-     ],
-     [
-      22.92,
-      33.38
      ]
     ],
     "width": 5

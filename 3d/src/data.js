@@ -42,11 +42,9 @@ export const SERVITUDE = {
 
 export const SCENARIO = {
   building: { ...IMPLANTATIONS[IMPLANTATION], w: 9.0, len: 15.3 },
-  // route d'accès en pavés gazon (largeur 5 m) ; premier point prolongé jusqu'à la rue
-  route: { pts: [[8.4, 26.15], [10.48, 26.26], [13.18, 26.41], [16.71, 26.67], [19.63, 26.92], [23.45, 27.29], [22.92, 33.38]], width: 5 },
-  parkings: [
-    { x: 22.12, y: 32.24, rot: 364.5, w: 2.7, h: 5, label: 'P4' },
-  ],
+  // route d'accès en pavés gazon (largeur 5 m) ; premier point prolongé jusqu'à la rue. L'ancienne
+  // branche sud vers P4 (à l'est du bâtiment) est supprimée : P4 passe au nord de l'accès, voir p56.
+  route: { pts: [[8.4, 26.15], [10.48, 26.26], [13.18, 26.41], [16.71, 26.67], [19.63, 26.92], [23.45, 27.29]], width: 5 },
   // P5/P6 : deux implantations au choix (sélecteur « Places P5/P6 » ou ?places=ouest|est)
   p56: {
     // ouest (actuelle) : places le plus à l'ouest possible, juste à côté de la zone de visibilité de
@@ -59,6 +57,9 @@ export const SCENARIO = {
         { x: 12.74, y: 21.378, rot: 3, w: 2.7, h: 5, label: 'P5' },
         { x: 16.64, y: 21.652, rot: 3, w: 2.7, h: 5, label: 'P6' },
       ],
+      // P4 en pavés gazon au nord du bout est de l'accès (entrée en marche avant depuis l'accès),
+      // entre les piliers de la terrasse 169 (0,28 m) et l'accès ; 4,4 m du bâtiment, 1,1 m de la limite est
+      p4: { x: 22.35, y: 22.2, rot: 3, w: 2.7, h: 5, label: 'P4', grass: true },
       paved: [[[11.523, 18.811], [18.119, 19.226], [17.843, 24.489], [11.261, 23.804]]],
     },
     // est (variante, visibilité depuis la rue) : places au sud-est de la maison 169, le long de la
@@ -70,8 +71,11 @@ export const SCENARIO = {
         { x: 21.6, y: 19.4, rot: 3, w: 2.7, h: 5, label: 'P5' },
         { x: 24.45, y: 19.5, rot: 3, w: 2.7, h: 5, label: 'P6' },
       ],
+      // P4 à l'ouest de P5 (pilier de la terrasse 169 entre les deux), 0,2 m de la façade sud de la 169 ;
+      // le pavage s'étend à l'ouest jusqu'à P4
+      p4: { x: 18.25, y: 20.25, rot: 3, w: 2.7, h: 5, label: 'P4' },
       paved: [
-        [[20.383, 16.833], [25.929, 17.074], [25.667, 22.067], [24.98, 22.32], [24.62, 25.2], [19.85, 24.72], [20.121, 21.826]],
+        [[19.73, 16.84], [20.383, 16.833], [25.929, 17.074], [25.667, 22.067], [24.98, 22.32], [24.62, 25.2], [16.75, 24.55], [16.95, 17.6], [19.71, 17.66]],
       ],
     },
   },

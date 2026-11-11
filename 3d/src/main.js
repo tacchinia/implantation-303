@@ -178,14 +178,12 @@ const B = SCENARIO.building;
   };
   slab(-1.6, 0, -0.55, LEN, 0.05);                 // bord nord aligné sur celui du sol du couvert
   slab(-1.6, 4.6, LEN, LEN + 2.4, 0.08);
-  // voitures sous le couvert + P4
+  // voitures sous le couvert (P4 : avec P5/P6, par variante, dans site.js)
   const colors = ['#8a9096', '#1f2d44', '#e8e6e1'];
   // les voitures du couvert suivent le repère du bâtiment
   const carsLocal = new THREE.Group(); carsLocal.position.copy(house.group.position); carsLocal.rotation.copy(house.group.rotation);
   [1.55, 4.5, 7.45].forEach((u, i) => { const c = site.makeCar(colors[i]); c.position.set(u, 0, 2.35); carsLocal.add(c); });
   site.groups.cars.add(carsLocal);
-  const p4 = SCENARIO.parkings[0], c4 = site.makeCar('#7a2e2a'); const [px, pz] = w2(p4.x, p4.y);
-  c4.position.set(px, 0, pz); c4.rotation.y = -p4.rot * D2R + Math.PI; site.groups.cars.add(c4);
   // silhouette à l'échelle (1,75 m) près de l'escalier
   const person = new THREE.Group();
   const limb = (r, len, x, y, z) => { const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 4, 10), M.person); m.position.set(x, y, z); return m; };
