@@ -163,9 +163,9 @@ select{font:500 13px var(--font);background:var(--chip);color:var(--ink);border:
     <section>
       <h2>Variante d'aménagement</h2>
       <div class="field"><span>Implantation</span><div class="seg" id="impl"></div><span></span></div>
-      <p class="hint">Conforme : retrait de 8 m à l'axe de la rue, maison décalée de 1,70 m vers l'est (et 0,40 m vers le nord) ; servitude de 1,63 m (≈ 24 m²) chez les voisins 999 et 292, en orange au sol avec les limites. Lien vers l'implantation actuelle : <code>?implantation=actuelle</code>.</p>
+      <p class="hint">Plan v2 : plan d'implantation de référence — 3,65 m de la limite et 8,00 m de l'axe de la rue, 3,00 m au sud, orientation 3,6° ; servitude chez les voisins 999 et 292 selon le plan (≈ 10,3 + 3,0 m²), en orange au sol, masquée par défaut (case « Servitude » ou <code>?servitude</code>). Lien vers l'ancienne implantation : <code>?implantation=actuelle</code>.</p>
       <div class="field"><span>Places P5/P6</span><div class="seg" id="p56"></div><span></span></div>
-      <p class="hint">Lien direct sans réglages : <code>?places=ouest</code> ou <code>?places=est</code>.</p>
+      <p class="hint">P4 est à l'est du bâtiment, à la suite des places couvertes P1–P3. Lien direct sans réglages : <code>?places=est</code> (défaut) ou <code>?places=ouest</code>.</p>
     </section>
 
     <section>
@@ -234,6 +234,7 @@ select{font:500 13px var(--font);background:var(--chip);color:var(--ink);border:
         <label><input type="checkbox" id="showCars" checked> Voitures</label>
         <label><input type="checkbox" id="showNeighbors" checked> Bâtiments voisins</label>
         <label><input type="checkbox" id="showLimits" checked> Limites parcelle</label>
+        <label><input type="checkbox" id="showServitude"> Servitude (orange)</label>
         <label><input type="checkbox" id="autumn"> Automne</label>
         <label><input type="checkbox" id="showPeople" checked> Silhouette 1,75 m</label>
         <label><input type="checkbox" id="showTerrace169"> Terrasse ancienne maison</label>
@@ -243,7 +244,7 @@ select{font:500 13px var(--font);background:var(--chip);color:var(--ink);border:
 
     <section>
       <p class="foot"><b>Maquette d'étude.</b> Les plans ne portent pas de cotes : volumes déduits des plans et élévations
-        et calés sur l'outil d'implantation (emprise 9,0 × 15,3 m, orientation 4,25°). Hypothèses : étage à +2,85 m,
+        et calés sur l'outil d'implantation (emprise 9,0 × 15,3 m, orientation 3,6° selon le plan d'implantation v2). Hypothèses : étage à +2,85 m,
         pente de toit 35 %, faîte ≈ +7,8 m, avant-toits 0,7–0,8 m, auvent nord posé sur la dalle de l’étage. Nord en haut du plan cadastral.</p>
     </section>
   </div>
