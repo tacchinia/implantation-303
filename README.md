@@ -13,7 +13,8 @@ du bardage mélèze façade par façade.
 Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
 
 - volumes relevés sur les plans et élévations (sans cotes) et calés sur l'implantation
-  ci-dessous : emprise 9,0 × 15,3 m, 3 places couvertes sous l'étage, escalier extérieur,
+  ci-dessous selon le **plan d'implantation v2** (plan n° 166/7) : emprise 9,0 × 15,3 m, orientation 3,6°,
+  3 places couvertes P1–P3 sous l'étage, escalier extérieur,
   coursive et terrasse à l'ouest, toit à deux pans décalés à 35 %, auvent tuilé au nord ;
 - **bardage mélèze en lames verticales** activable par façade (nord / est / sud / ouest gauche
   jusqu'au balcon / ouest droite côté balcon, × rez / étage, plus le décrochement ouest
@@ -21,32 +22,29 @@ Fichier HTML autonome (three.js embarqué, fonctionne hors ligne) :
   jointive ou à claire-voie, vieillissement (neuf → gris argent) ; surface bardée estimée ;
 - teintes d'enduit, de toiture et de menuiseries ;
 - rue de la Mairie relevée sur le cadastre (chaussée jusqu'à la bordure du trottoir ouest, trottoir jusqu'à
-  la limite de la parcelle de la rue), accès (arrêté au bord de la rue) en **pavés gazon**, places P4/P5/P6
-  avec trois voitures témoins, selon deux variantes (P4 au nord du bout est de l'accès, en pavés gazon, en variante
-  ouest ; à l'ouest de P5, dans le pavage, en variante est) : **ouest** (actuelle, le plus à l'ouest possible
-  juste à côté de la zone de visibilité de l'accès, passage piéton de 1,2 m entre P5 et P6 dans l'axe de la porte
-  de l'ancienne maison, gazon entre la haie et P5) ou **est** (le long de la limite est, au sud de l'ancienne maison, accès pavé depuis les pavés gazon ;
-  la verdure passe à l'ouest, en gazon jusqu'à la haie) ; limites de parcelle, voisins
-  schématiques ; muret de 30 × 15 cm en limite sud ; haie basse d'arbustes d'essences variées
-  le long de la rue (sauf l'accès de 5 m), 0,60 m au plus ; **zones de visibilité** de l'accès selon le schéma de
-  la loi sur les accès (case à cocher : point d'observation sur l'axe de l'accès à 3 m du bord de la chaussée,
-  points visés à 20 m et à 1,5 m du bord de la voie empruntée, triangles nord et sud au sol, lignes de visibilité) ; balcon/coursive en dalle béton ; dallage continu
-  le long de la façade ouest (depuis les pavés gazon, pied de l'escalier compris) jusqu'à la terrasse sud,
-  qui s'arrête au droit de la grande baie ; terrasse de l'ancienne maison en hauteur (1er étage, deux
-  piliers bois), masquée par défaut ; côté est et côté sud de
-  l'ancienne maison pavés (jusqu'à la limite est et à l'alignement des places P5/P6,
-  dessous de la terrasse compris) ; lignée d'arbres au nord de l'accès ; quelques arbres aux alentours ;
+  la limite de la parcelle de la rue), accès en **pavés gazon** du bord de la rue jusqu'à la limite est ;
+  **P4 à l'est du bâtiment**, à la suite de P1–P3 (même front nord, pavés béton sous la voiture jusqu'à la
+  limite est, pavés gazon sur l'accès) ; **allée piétonne en dalles pleines** de la rue à la façade ouest,
+  au sud de l'accès ; places P5/P6 avec voitures témoins selon deux variantes : **est** (référence, par
+  défaut : le long de la limite est, au sud de l'ancienne maison ; verdure à l'ouest de P5 jusqu'à la haie)
+  ou **ouest** (le plus à l'ouest possible, à côté de la zone de visibilité de l'accès) ; limites de parcelle,
+  voisins schématiques ; muret de 30 × 15 cm en limite sud ; haie basse d'arbustes d'essences variées
+  le long de la rue (sauf l'accès et l'allée piétonne), 0,60 m au plus ; **zones de visibilité** de l'accès
+  (case à cocher) ; balcon/coursive en dalle béton ; dallage le long de la façade ouest jusqu'à la terrasse
+  sud ; terrasse de l'ancienne maison en hauteur, masquée par défaut ; abords pavés de l'ancienne maison ;
+  quelques arbres aux alentours ;
 - soleil réglable (heure, mois) avec ombres portées, points de vue prédéfinis, boussole.
 
 Paramètres d'adresse (combinables avec `&`) :
 
-- **`?implantation=actuelle`** revient à l'implantation d'origine (6,32 m à l'axe de la rue, non
-  conforme) ; par défaut, implantation **conforme** au retrait de 8 m à l'axe : maison décalée de
-  1,70 m vers l'est et 0,40 m vers le nord, servitude de distance chez les voisins 999 et 292 en
-  orange au sol (calque des limites). Sélecteur « Implantation » dans le panneau ;
+- **`?implantation=actuelle`** revient à l'ancienne implantation ; par défaut, implantation du **plan
+  d'implantation v2** (3,65 m de la limite et 8,00 m de l'axe de la rue, 3,00 m au sud). Sélecteur
+  « Implantation » dans le panneau ;
+- **`?servitude`** affiche la servitude de distance chez les voisins 999 et 292 (bande orange au sol,
+  masquée par défaut ; aussi case « Servitude » du panneau) ;
 - **`?reglages`** affiche le panneau de réglages, masqué par défaut (vue en consultation seule) ;
-- **`?places=est`** ou **`?places=ouest`** (défaut) choisit la variante des places P5/P6, aussi
-  modifiable dans le panneau. Exemple de lien sans réglages : `maison-303-3d.html?places=est`.
+- **`?places=est`** (défaut) ou **`?places=ouest`** choisit la variante des places P5/P6, aussi
+  modifiable dans le panneau. Exemple : `maison-303-3d.html?places=ouest&servitude`.
 
 Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.html`.
 
@@ -56,13 +54,14 @@ Sources dans `3d/` : `npm install && npm run build` régénère `maison-303-3d.h
 - Zone constructible et bande de retrait de 3 m (limites sud / ouest / est) précalculées.
 - Bâtiment déplaçable et pivotable, avec aimantation sur les angles des limites, sur
   le retrait de 3 m côté ouest et sur le retrait de 8 m à l'axe de la rue.
-- **Retrait de 8 m à l'axe de la rue** (axe = milieu de la chaussée, trottoir exclu) :
-  carte dédiée avec la case « Implantation conforme » (cochée par défaut ;
-  `?implantation=actuelle` pour l'implantation d'origine). Bâtiment conforme : +1,70 m vers
-  l'est, +0,40 m vers le nord. **Servitude de distance** chez les voisins 999 et 292
-  (bande orange sur le plan) : distance achetée (3 m − distance à la limite) et surface, en
-  direct et par voisin — 1,63 m, 12,1 + 12,2 = 24,2 m² dans la position conforme. Les places
-  chevauchées par le bâtiment sont signalées (P4 a été déplacée au nord de l'accès).
+- **Plan d'implantation v2 (référence)** : position par défaut du bâtiment relevée sur le plan
+  n° 166/7 (rot. 3,6°, 3,65 m de la limite côté rue, 8,00 m de l'axe, 3,00 m au sud, 2,44 m à l'est) ;
+  case « Implantation de référence » (décochée ou `?implantation=actuelle` : ancienne position).
+  L'axe de la rue est celui du plan. Cotes du plan côté rue (3,65 m + 4,40 m à l'axe) chargées
+  comme mesures. **Servitude** selon le plan : limite virtuelle en ligne brisée jusqu'au point de la
+  mitoyenne 999/292 situé à 3 m du bâtiment, 10,3 m² (999) + 3,0 m² (292) (plan : 10,40 + 3,20).
+  Scénario par défaut : P4 à l'est du bâtiment (à la suite des places couvertes), P5/P6 à l'est,
+  accès jusqu'à la limite est, allée piétonne, gabarit de braquage masqué.
 - **Distances vivantes** aux limites, recalculées en continu et affichées en rouge
   lorsqu'elles descendent sous 3 m.
 - Dimensions du bâtiment simulables (largeur / longueur).

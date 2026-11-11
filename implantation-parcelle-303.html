@@ -152,6 +152,7 @@ source d'information.
      pincement (coin E3 partagé) ; seul l'achat aux deux débloque.
 
 8b. IMPLANTATION CONFORME ET SERVITUDE DE DISTANCE (v14, 11.11.2026)
+   [historique : position, axe et servitude remplacés en v15, voir 8c]
    · L'implantation « 6 places avec route » (x 11.755, y 28.921, rot 4.25)
      n'est qu'à 6.32 m de l'axe : NON CONFORME.
    · BUILDING_PRESETS.conforme (x 13.455, y 28.516, rot 4.25) : +1.70 m
@@ -180,6 +181,29 @@ source d'information.
      Calques, Alt pour ignorer), prioritaire sur celle des 3 m ouest.
    · GEO.road_w remplacé par le relevé fin du bord ouest de la chaussée
      (même tracé que la maquette 3D, 3d/src/data.js).
+
+8c. PLAN D'IMPLANTATION v2 — RÉFÉRENCE (v15, 11.11.2026)
+   · Source : plan « Implantation » n° 166/7 du bureau d'études (1:100),
+     calé sur le cadastre par 9 bornes (similitude, écart ≈ 0.1 m).
+   · BUILDING_PRESETS.plan (x 12.275, y 28.846, rot 3.6) remplace la
+     position « conforme » v14 : façade ouest à 3.65 m de la limite (cote
+     du plan, mesurée 2.35 m au sud de la façade nord), 3.00 m au sud
+     (angle sud-est), 2.44 m à l'est au droit de E3 (plan : 2.42),
+     8.00 m à l'axe. ?implantation=actuelle : ancienne position.
+   · ROAD_AXIS = axe (trait mixte) du plan, et non plus le milieu de la
+     chaussée (qui donnerait ≈ 7.0 m) ; calé de 0.12 m pour retrouver les
+     8.00 m cotés. Au droit de la cote : 3.65 + 4.40 m (plan 4.35).
+   · Servitude selon le plan : limite virtuelle J1 → K → SE (voir
+     computeServitude) ; 10.3 m² (999) + 3.0 m² (292), profondeur 0.56 m
+     à la mitoyenne (plan : 10.40 + 3.20 m², 0.58 m).
+   · Scénario par défaut « Plan d'implantation v2 (6 places) » : P4
+     (2.50 × 5.00 m) à l'est du bâtiment, dans l'alignement des 3 places
+     couvertes P1–P3 (même front nord, contre la façade est, 4 cm de la
+     limite à l'angle sud-est) ; P5/P6 à l'est (comme la maquette 3D) ;
+     accès en pavés gazon prolongé jusqu'à la limite est ; zone
+     « piétons » = allée en dalles de la rue à la façade ouest, au sud de
+     l'accès ; gabarit de braquage masqué ; mesures = cotes du plan côté
+     rue (3.65 m à la limite, 4.40 m de la limite à l'axe).
 
 9. MODÈLE D'ÉTAT, EXPORT ET SCÉNARIOS EMBARQUÉS
    state.items : liste d'objets {id, type, ...}. Types : building (unique,
@@ -313,6 +337,9 @@ source d'information.
       conforme par défaut (case + ?implantation=actuelle), servitude de
       distance chez les voisins 999 / 292 (bande orange, distance et
       surface en direct), aimantation à 8 m de l'axe (voir section 8b).
+    · v15 (11.11.2026) : plan d'implantation v2 comme référence
+      (position, axe de la rue, servitude J1–K–SE), P4 à l'est du
+      bâtiment, P5/P6 à l'est, allée piétonne, gabarit masqué (8c).
 13. AVERTISSEMENT
     Document de travail destiné aux études de variantes. Ne remplace ni un
     plan de géomètre officiel ni le règlement communal des constructions.
@@ -426,9 +453,9 @@ footer{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:10px}
 
     <div class="card" id="axeCard">
       <h2>Retrait 8 m à l'axe de la rue · servitude</h2>
-      <label class="chk"><input type="checkbox" id="optConf" checked> <span><b>Implantation conforme</b> (reculée vers l'est)</span></label>
+      <label class="chk"><input type="checkbox" id="optConf" checked> <span><b>Implantation de référence</b> (plan d'implantation v2)</span></label>
       <div id="servBox"></div>
-      <div class="hint">Axe = milieu de la chaussée (trottoir ouest exclu). Position conforme : bâtiment déplacé de 1,70 m vers l'est et de 0,40 m vers le nord (pour garder 3 m au sud), rotation inchangée. Case décochée : implantation actuelle (6,32 m à l'axe). Lien direct : <code>?implantation=actuelle</code>.<br>Servitude : bande orange sur le terrain des voisins à moins de 3 m du bâtiment (« limite virtuelle »). Les voisins s'engagent à ne pas y bâtir, ce qui garantit 6 m entre bâtiments. Profondeur = 3 m − distance à la limite.</div>
+      <div class="hint">Référence : plan d'implantation v2 (plan n° 166/7, 1:100) — façade ouest à 3,65 m de la limite et 8,00 m de l'axe de la rue, 3,00 m au sud, rotation 3,6°. Axe = trait mixte du plan, calé sur le cadastre (4,35 m de la limite selon le plan). Case décochée : ancienne implantation (avant le plan v2). Lien direct : <code>?implantation=actuelle</code>.<br>Servitude (plan v2) : limite virtuelle en ligne brisée depuis le sommet est de la limite (hauteur de l'ancienne cabane) jusqu'au point de la mitoyenne 999/292 situé à 3 m du bâtiment, puis jusqu'au coin sud-est ; les voisins s'engagent à ne pas bâtir entre cette ligne et la limite (6 m entre bâtiments). Plan : 10,40 m² (999) + 3,20 m² (292). Profondeur = 3 m − distance à la limite.</div>
     </div>
 
     <div class="card">
@@ -531,16 +558,16 @@ const EMBEDDED_SCENARIOS = [
 // ▼▼▼ COLLEZ VOS SCÉNARIOS ICI (chaque JSON suivi d'une virgule) ▼▼▼
 {
  "version": 1,
- "name": "6 places avec route",
- "date": "2026-08-14T11:43:50.908Z",
+ "name": "Plan d'implantation v2 (6 places)",
+ "date": "2026-11-11T20:00:00.000Z",
  "state": {
   "items": [
    {
     "id": "bld",
     "type": "building",
-    "x": 11.755,
-    "y": 28.921,
-    "rot": 4.25,
+    "x": 12.275,
+    "y": 28.846,
+    "rot": 3.6,
     "hidden": false,
     "len": 15.3,
     "w": 9
@@ -558,10 +585,10 @@ const EMBEDDED_SCENARIOS = [
    {
     "id": "p4",
     "type": "parking",
-    "x": 22.35,
-    "y": 22.2,
-    "rot": 3,
-    "w": 2.7,
+    "x": 22.348,
+    "y": 31.985,
+    "rot": 3.6,
+    "w": 2.5,
     "h": 5,
     "label": "P4",
     "hidden": false
@@ -569,17 +596,31 @@ const EMBEDDED_SCENARIOS = [
    {
     "id": "p5",
     "type": "parking",
-    "x": 11.23,
-    "y": 21.3,
+    "x": 21.6,
+    "y": 19.4,
     "rot": 3,
     "w": 2.7,
     "h": 5,
     "label": "P5"
    },
    {
+    "id": "it105",
+    "type": "parking",
+    "x": 24.45,
+    "y": 19.5,
+    "rot": 3,
+    "w": 2.7,
+    "h": 5,
+    "label": "P6"
+   },
+   {
     "id": "rte",
     "type": "route",
     "pts": [
+     [
+      8.4,
+      26.15
+     ],
      [
       10.48,
       26.26
@@ -597,11 +638,22 @@ const EMBEDDED_SCENARIOS = [
       26.92
      ],
      [
-      23.45,
-      27.29
+      24.38,
+      27.38
      ]
     ],
     "width": 5
+   },
+   {
+    "id": "it106",
+    "type": "zone",
+    "x": 10.413,
+    "y": 29.38,
+    "rot": 3.6,
+    "w": 3.65,
+    "h": 1.3,
+    "label": "piétons",
+    "noCote": true
    },
    {
     "id": "gab",
@@ -610,22 +662,13 @@ const EMBEDDED_SCENARIOS = [
     "y": 25.59,
     "rot": 3,
     "rOut": 5.85,
-    "rIn": 3.25
-   },
-   {
-    "id": "it105",
-    "type": "parking",
-    "x": 14.08,
-    "y": 21.39,
-    "rot": 3,
-    "w": 2.7,
-    "h": 5,
-    "label": "P6"
+    "rIn": 3.25,
+    "hidden": true
    }
   ],
   "simLimit": {
    "active": false,
-   "mode": "n999",
+   "mode": "both",
    "p1": [
     25.951,
     22.143
@@ -633,19 +676,32 @@ const EMBEDDED_SCENARIOS = [
    "p2": [
     23.367,
     47.033
-   ],
-   "__segA": [
-    25.951,
-    22.143
-   ],
-   "__segB": [
-    24.496,
-    36.161
    ]
   }
  },
- "measures": []
-}
+ "measures": [
+  [
+   [
+    12.127,
+    31.191
+   ],
+   [
+    8.485,
+    30.962
+   ]
+  ],
+  [
+   [
+    8.485,
+    30.962
+   ],
+   [
+    4.093,
+    30.686
+   ]
+  ]
+ ]
+},
 // ▲▲▲ FIN DES SCÉNARIOS EMBARQUÉS · NE PAS SUPPRIMER CETTE LIGNE ▲▲▲
 ];
 
@@ -698,19 +754,21 @@ function closestPair(poly, line){ // returns [ptOnPoly, ptOnLine, dist]
 function fmt(v){ return v.toFixed(2).replace('.',','); }
 function fmt1(v){ return v.toFixed(1).replace('.',','); }
 
-/* ---------- retrait de 8 m à l'axe de la rue + servitude de distance (v14) ----------
-   Axe de la rue de la Mairie = milieu de la CHAUSSÉE, entre son bord ouest (GEO.road_w,
-   bordure du trottoir ouest, trottoir exclu) et son bord est (GEO.road_e = limite ouest
-   de la parcelle 303), échantillonné tous les 0.5 m en y. */
+/* ---------- retrait de 8 m à l'axe de la rue + servitude de distance (v14, v15) ----------
+   Axe de la rue de la Mairie = axe du PLAN D'IMPLANTATION v2 (plan n° 166/7, bureau
+   d'études, 1:100) : trait mixte relevé sur le plan, calé sur le cadastre par ses bornes
+   (écart moyen ≈ 0.1 m), puis ajusté de 0.12 m pour que le bâtiment de référence soit à
+   8.00 m de l'axe comme coté (plan : 3.65 m à la limite + 4.35 m de la limite à l'axe). */
 const AXIS_MIN = 8;            // retrait minimal du rectangle déterminant à l'axe de la rue
 const LIMIT_MIN = 3;           // distance aux limites ; 2 × 3 m = 6 m entre bâtiments
 const Y_999_292 = 36.161;      // limite mitoyenne 999/292, supposée horizontale à y = E3.y
-// positions prédéfinies du bâtiment (rot. 4.25°, 9.0 × 15.3 m) — case « Implantation conforme »
+// positions prédéfinies du bâtiment (9.0 × 15.3 m) — case « Implantation de référence »
 const BUILDING_PRESETS = {
-  // conforme : +1.70 m vers l'est et 0.405 m vers le nord depuis la position actuelle ;
-  // 8.00 m à l'axe, 3.00 m au sud, 4.67 m à l'ouest, 1.37 m à l'est → servitude ≈ 1.63 m
-  conforme: {x: 13.455, y: 28.516, rot: 4.25},
-  // actuelle : position du scénario « 6 places avec route » (6.32 m à l'axe, non conforme)
+  // plan : implantation de référence du plan d'implantation v2 — rot. 3.6° (relevée sur le plan),
+  // 3.65 m de la façade ouest à la limite (cote du plan), 3.00 m au sud (angle sud-est),
+  // 8.00 m à l'axe, 2.44 m à l'est (plan : 2.42) → servitude 999 + 292 ≈ 10.3 + 3.0 m²
+  plan: {x: 12.275, y: 28.846, rot: 3.6},
+  // actuelle : ancienne position du scénario « 6 places avec route » (avant le plan v2)
   actuelle: {x: 11.755, y: 28.921, rot: 4.25}
 };
 function xAtY(line,y){
@@ -718,13 +776,8 @@ function xAtY(line,y){
     if((y-a[1])*(y-b[1])<=0 && a[1]!==b[1]) return a[0]+(b[0]-a[0])*(y-a[1])/(b[1]-a[1]); }
   return null;
 }
-function computeRoadAxis(){
-  const rw=GEO.road_w, re=GEO.road_e, out=[];
-  const y0=Math.max(rw[0][1],re[0][1]), y1=Math.min(rw[rw.length-1][1],re[re.length-1][1]);
-  for(let y=y0;y<=y1+1e-9;y+=0.5){ const w=xAtY(rw,y), e=xAtY(re,y); if(w!==null&&e!==null) out.push([(w+e)/2,y]); }
-  return out;
-}
-const ROAD_AXIS = computeRoadAxis();
+// axe de la rue selon le plan d'implantation v2 (repère du cadastre, nord → sud)
+const ROAD_AXIS = [[7.27,1.711],[4.51,24.585],[3.677,36.792],[2.955,50.967],[4.354,56.448]];
 function polyArea(P){ let s=0; for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length]; s+=a[0]*b[1]-b[0]*a[1];} return Math.abs(s)/2; }
 function signedArea(P){ let s=0; for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length]; s+=a[0]*b[1]-b[0]*a[1];} return s/2; }
 // tampon de d mètres autour d'un polygone CONVEXE (rectangle) : coins en arcs de n segments
@@ -771,24 +824,46 @@ function splitChainAtY(chain,y){
   return [N,S];
 }
 /* Servitude de distance : la limite est (réelle ou simulée) est plus proche que 3 m du
-   bâtiment ; pour garder 6 m entre bâtiments, chaque voisin s'engage à ne pas construire
-   dans la bande de son terrain située à moins de 3 m de notre bâtiment (« limite
-   virtuelle » à 3 m du rectangle déterminant). Surface = (tampon 3 m du rectangle) ∩
-   (terrain à l'est de la limite), coupée à la limite mitoyenne 999/292. Profondeur
-   achetée = 3 m − distance du bâtiment à la portion de limite de chaque voisin. */
+   bâtiment ; pour garder 6 m entre bâtiments, les voisins s'engagent à ne pas construire
+   en deçà d'une « limite virtuelle » à 3 m au moins de notre bâtiment.
+   · Limite est réelle (v15, selon le plan d'implantation v2) : la limite virtuelle est la
+     ligne brisée J1 → K → SE, où J1 = sommet de la limite est au droit de l'ancienne cabane
+     (25.951, 22.143), SE = coin sud-est, K = point de la mitoyenne 999/292 (y = 36.161) le
+     plus proche de E3 tel que J1–K–SE reste à 3 m au moins du bâtiment. Servitude 999 =
+     polygone J1–K–E3–E2, servitude 292 = triangle K–SE–E3 (plan : 10.40 + 3.20 m²).
+     Chaque part n'existe que si le bâtiment est à moins de 3 m de la limite de ce voisin.
+   · Limite simulée (achat de terrain) : tampon de 3 m du rectangle ∩ terrain à l'est de la
+     limite, coupé à la mitoyenne (méthode v14).
+   Profondeur = 3 m − distance du bâtiment à la portion de limite de chaque voisin. */
+function servPart(nm, zone, chain, poly){
+  const cp = chain.length>1 ? closestPair(poly,chain) : [null,null,Infinity];
+  const area = zone && zone.length>2 ? polyArea(zone) : 0;
+  const ok = area>=0.005 && cp[2]<LIMIT_MIN;
+  return {name:nm, zone: ok?zone:[], area: ok?area:0, depth: ok?Math.max(0,LIMIT_MIN-cp[2]):0, pb:cp[0], pl:cp[1], d:cp[2]};
+}
 function computeServitude(poly, eastLine){
+  const E=GEO.boundaries.east;
+  const [nChain,sChain]=splitChainAtY(eastLine, Y_999_292);
+  if(eastLine===E){
+    const J1=E[1], E2=E[2], E3=E[3], SE=E[4];
+    const d999=polyPolylineDist(poly,nChain), d292=polyPolylineDist(poly,sChain);
+    if(d999>=LIMIT_MIN && d292>=LIMIT_MIN) return {parts:[servPart('999',[],nChain,poly),servPart('292',[],sChain,poly)], area:0, depth:0};
+    // K : recherche par dichotomie le long de la mitoyenne, vers l'est depuis E3
+    const okK=x=>{ const K=[x,E3[1]];
+      return (d999>=LIMIT_MIN || polyPolylineDist(poly,[J1,K])>=LIMIT_MIN-1e-4) && (d292>=LIMIT_MIN || polyPolylineDist(poly,[K,SE])>=LIMIT_MIN-1e-4); };
+    let lo=E3[0], hi=E3[0]+LIMIT_MIN+0.5;
+    if(!okK(lo)){ for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(okK(m)) hi=m; else lo=m; } } else hi=lo;
+    const K=[Math.round(hi*1000)/1000, E3[1]];
+    const parts=[servPart('999', d999<LIMIT_MIN? [J1,K,E3,E2] : [], nChain, poly),
+                 servPart('292', d292<LIMIT_MIN? [K,SE,E3] : [], sChain, poly)];
+    return {parts, K, virtual:[J1,K,SE], area:parts[0].area+parts[1].area, depth:Math.max(parts[0].depth,parts[1].depth)};
+  }
   const last=eastLine[eastLine.length-1];
   const region=[...eastLine, [last[0],80], [80,80], [80,eastLine[0][1]]];
   const zone=clipConvex(region, convexBuffer(poly, LIMIT_MIN, 16));
   const nZone=clipConvex(zone, [[-50,-50],[100,-50],[100,Y_999_292],[-50,Y_999_292]]);
   const sZone=clipConvex(zone, [[-50,Y_999_292],[100,Y_999_292],[100,120],[-50,120]]);
-  const [nChain,sChain]=splitChainAtY(eastLine, Y_999_292);
-  const part=(nm,z,ch)=>{
-    const cp = ch.length>1 ? closestPair(poly,ch) : [null,null,Infinity];
-    const depth=Math.max(0, LIMIT_MIN-cp[2]), area=z.length>2? polyArea(z) : 0;
-    return {name:nm, zone:z, area: area<0.005?0:area, depth: area<0.005?0:depth, pb:cp[0], pl:cp[1], d:cp[2]};
-  };
-  const parts=[part('999',nZone,nChain), part('292',sZone,sChain)];
+  const parts=[servPart('999',nZone,nChain,poly), servPart('292',sZone,sChain,poly)];
   return {parts, area:parts[0].area+parts[1].area, depth:Math.max(parts[0].depth,parts[1].depth)};
 }
 
@@ -804,9 +879,9 @@ function getRequestedScenarioIndex(){
   return Number.isInteger(idx) ? idx : null;
 }
 const REQUESTED_SCENARIO_INDEX = getRequestedScenarioIndex();
-/* implantation appliquée à l'ouverture et par « Réinitialiser » : conforme (8 m à l'axe,
-   défaut) ou actuelle avec ?implantation=actuelle */
-const INITIAL_IMPLANTATION = new URLSearchParams(location.search).get('implantation')==='actuelle' ? 'actuelle' : 'conforme';
+/* implantation appliquée à l'ouverture et par « Réinitialiser » : référence du plan
+   d'implantation v2 (défaut) ou ancienne position avec ?implantation=actuelle */
+const INITIAL_IMPLANTATION = new URLSearchParams(location.search).get('implantation')==='actuelle' ? 'actuelle' : 'plan';
 const INITIAL_SCENARIO_INDEX = (REQUESTED_SCENARIO_INDEX!==null && EMBEDDED_SCENARIOS[REQUESTED_SCENARIO_INDEX]) ? REQUESTED_SCENARIO_INDEX : 0;
 const INITIAL_SCENARIO = EMBEDDED_SCENARIOS.length
   ? EMBEDDED_SCENARIOS[INITIAL_SCENARIO_INDEX]
@@ -869,7 +944,7 @@ function buildStatic(){
   if(al) el('polyline',{points:polyStr(al),fill:'none',stroke:'#ea580c','stroke-width':1.4,'stroke-dasharray':'7 4','vector-effect':'non-scaling-stroke'},gAxis);
   const lblOn=(line,y,dx,txt,col)=>{ const x=xAtY(line,y); if(x===null) return;
     const t=el('text',{x:x+dx,y:y,'font-size':0.7,class:'lbl','text-anchor':'middle',style:'fill:'+col,transform:`rotate(-87 ${x+dx} ${y})`},gAxis); t.textContent=txt; };
-  lblOn(ROAD_AXIS,36,-0.25,'axe chaussée','#475569');
+  lblOn(ROAD_AXIS,36,-0.25,'axe de la rue (plan v2)','#475569');
   if(al) lblOn(al,47,-0.25,'8 m à l’axe','#c2410c');
   gServ = el('g',{id:'gServ'});
   gSim = el('g',{id:'gSim'});
@@ -989,7 +1064,7 @@ function renderRect(it,sel){
   }
   const t=el('text',{x:0,y:0.25,'font-size':0.8,class:'lbl','text-anchor':'middle'},g);
   t.textContent = isPark? (it.label||'P') : (it.type==='terrace'?'Terrasse':(it.label||'Zone'));
-  if(showCotes){
+  if(showCotes && !it.noCote){   // noCote : zone sans cote (ex. allée piétonne, cotée par les mesures)
     const c=el('text',{x:0,y:-h/2-0.35,'font-size':0.7,class:'lbl dimlbl','text-anchor':'middle'},g);
     c.textContent=fmt(w)+' × '+fmt(h)+' m';
   }
@@ -998,12 +1073,12 @@ function renderRect(it,sel){
 
 function renderRoute(it,sel){
   const g=el('g',{'data-id':it.id},gItems);
-  el('polyline',{points:polyStr(it.pts),fill:'none',stroke:'#78350f','stroke-width':it.width,'stroke-linecap':'round','stroke-linejoin':'round',opacity:0.25},g);
+  el('polyline',{points:polyStr(it.pts),fill:'none',stroke:'#78350f','stroke-width':it.width,'stroke-linecap':'butt','stroke-linejoin':'round',opacity:0.25},g);
   el('polyline',{points:polyStr(it.pts),fill:'none',stroke:sel?'#1d4ed8':'#78350f','stroke-width':1.5,'stroke-dasharray':'4 3','vector-effect':'non-scaling-stroke',cursor:'move'},g);
   const m=it.pts[Math.floor(it.pts.length/2)];
   const t=el('text',{x:m[0],y:m[1]-it.width/2-0.3,'font-size':0.8,class:'lbl','text-anchor':'middle'},g); t.textContent="Route d'accès";
   if(showCotes){
-    const c=el('text',{x:m[0],y:m[1]+it.width/2+0.7,'font-size':0.7,class:'lbl dimlbl','text-anchor':'middle'},g);
+    const c=el('text',{x:m[0],y:m[1]+it.width/2-0.45,'font-size':0.7,class:'lbl dimlbl','text-anchor':'middle'},g);
     let L=0; for(let i=0;i<it.pts.length-1;i++) L+=Math.hypot(it.pts[i+1][0]-it.pts[i][0],it.pts[i+1][1]-it.pts[i][1]);
     c.textContent='larg. '+fmt(it.width)+' m · long. '+fmt(L)+' m';
   }
@@ -1227,8 +1302,8 @@ function renderServitude(b, poly, eastLine){
   box.innerHTML=h;
   const cb=document.getElementById('optConf'), P=BUILDING_PRESETS;
   const at=k=>Math.abs(b.x-P[k].x)<0.01 && Math.abs(b.y-P[k].y)<0.01 && Math.abs((b.rot||0)-P[k].rot)<0.01;
-  cb.indeterminate = !at('conforme') && !at('actuelle');
-  if(at('conforme')) cb.checked=true; else if(at('actuelle')) cb.checked=false;
+  cb.indeterminate = !at('plan') && !at('actuelle');
+  if(at('plan')) cb.checked=true; else if(at('actuelle')) cb.checked=false;
   if(!document.getElementById('lyServ').checked || !(sv.area>0)) return;
   // dessin : bandes hachurées orange par voisin, limite virtuelle à 3 m, cote de la profondeur
   for(const p of sv.parts){
@@ -1594,13 +1669,13 @@ document.getElementById('btnZoomIn').onclick=()=>{const w=svg.clientWidth/2,h=sv
 document.getElementById('btnZoomOut').onclick=()=>{const w=svg.clientWidth/2,h=svg.clientHeight/2;view.tx=w-(w-view.tx)/1.25;view.ty=h-(h-view.ty)/1.25;view.scale/=1.25;applyView();};
 document.getElementById('btnFit').onclick=fitView;
 document.getElementById('btnReset').onclick=()=>{ if(confirm('Revenir au scénario par défaut ? Les modifications non exportées seront perdues.')){ loadScenario(INITIAL_SCENARIO); applyImplantation(INITIAL_IMPLANTATION); } };
-/* implantation conforme (8 m à l'axe) ou actuelle : replace le bâtiment sur la position prédéfinie */
+/* implantation de référence (plan v2) ou ancienne : replace le bâtiment sur la position prédéfinie */
 function applyImplantation(k){
   const b=state.items.find(i=>i.type==='building'), P=BUILDING_PRESETS[k];
   if(!b||!P) return;
   b.x=P.x; b.y=P.y; b.rot=P.rot; renderItems();
 }
-document.getElementById('optConf').onchange=e=>applyImplantation(e.target.checked?'conforme':'actuelle');
+document.getElementById('optConf').onchange=e=>applyImplantation(e.target.checked?'plan':'actuelle');
 document.getElementById('btnExport').onclick=()=>{
   const name=document.getElementById('scnName').value.trim();
   const blob=new Blob([JSON.stringify({version:1,name:name||undefined,date:new Date().toISOString(),state,measures},null,1)],{type:'application/json'});

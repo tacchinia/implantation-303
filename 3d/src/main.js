@@ -3,8 +3,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import * as TX from './textures.js';
 import { buildHouse, FACADES, KEY_LABEL, W, LEN } from './house.js';
-import { buildSite, w2, FOLIAGE } from './site.js';
-import { SCENARIO, IMPLANTATIONS, IMPLANTATION } from './data.js';
+import { buildSite, w2, b2plan, FOLIAGE } from './site.js';
+import { GEO, SCENARIO, IMPLANTATIONS, IMPLANTATION } from './data.js';
 
 const D2R = Math.PI / 180;
 const $ = (id) => document.getElementById(id);
@@ -162,10 +162,18 @@ const B = SCENARIO.building;
   house.group.position.set(x, 0, z);
   house.group.rotation.y = -B.rot * D2R;
   scene.add(house.group);
-  // sol du couvert (pavés béton) et abords
-  const floor = new THREE.Mesh(new THREE.BoxGeometry(W + 0.4, 0.06, 5.5), M.carportFloor);
-  floor.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 5.5 : W + 0.4); });
-  floor.position.set(W / 2, 0.0, -0.55 + 2.75); floor.receiveShadow = true; house.group.add(floor);
+  // sol du couvert (pavés béton) prolongé à l'est sous P4 jusqu'à la limite est (même front nord que
+  // les places couvertes P1–P3 : les pavés gazon de l'accès commencent au même bord), coupé sur la limite
+  const FW = 13.2;                                    // u −0,2 → 13,0, au-delà de la limite (coupé)
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(FW, 0.06, 5.5), M.carportFloor);
+  floor.geometry.attributes.uv.array.forEach((v, i, a) => { a[i] = v * ((i % 2) ? 5.5 : FW); });
+  floor.position.set(-0.2 + FW / 2, 0.0, -0.55 + 2.75); floor.receiveShadow = true; house.group.add(floor);
+  {
+    const [ax, az] = w2(25.01, 22.299), [bx, bz] = w2(23.281, 36.161);      // limite est E2–E3
+    const n = new THREE.Vector3(-(bz - az), 0, bx - ax).normalize();
+    if (n.x > 0) n.negate();                                                  // normale vers l'ouest (intérieur)
+    M.carportFloor.clippingPlanes = [new THREE.Plane(n, -(n.x * ax + n.z * az))];
+  }
   // dallage : passage le long de la façade ouest, depuis les pavés gazon de l'accès (pied de l'escalier
   // compris) jusqu'au sud, puis terrasse sud d'un seul tenant jusqu'au droit de la grande baie vitrée.
   // UV en coordonnées locales : le calepinage se raccorde entre les deux surfaces.
@@ -178,6 +186,21 @@ const B = SCENARIO.building;
   };
   slab(-1.6, 0, -0.55, LEN, 0.05);                 // bord nord aligné sur celui du sol du couvert
   slab(-1.6, 4.6, LEN, LEN + 2.4, 0.08);
+  // allée piétonne en dalles pleines : de la rue (limite ouest) au dallage de la façade ouest, contre le
+  // bord sud de l'accès en pavés gazon (on n'a plus à marcher sur les pavés gazon)
+  {
+    const { v0, v1 } = SCENARIO.footpath, vm = (v0 + v1) / 2;
+    // u de la limite ouest au milieu de l'allée (intersection de la droite v = vm avec la limite)
+    const a = b2plan(0, vm), b = b2plan(-1, vm), d = [b[0] - a[0], b[1] - a[1]];
+    let uL = -3.6;
+    const L = GEO.boundaries.west;
+    for (let i = 0; i < L.length - 1; i++) {
+      const p = L[i], q = L[i + 1], e = [q[0] - p[0], q[1] - p[1]], den = d[0] * e[1] - d[1] * e[0];
+      const t = ((p[0] - a[0]) * e[1] - (p[1] - a[1]) * e[0]) / den, s2 = ((p[0] - a[0]) * d[1] - (p[1] - a[1]) * d[0]) / den;
+      if (s2 >= 0 && s2 <= 1 && t > 0) uL = -t;
+    }
+    slab(uL, -1.6, v0, v1, 0.05);
+  }
   // voitures sous le couvert (P4 : avec P5/P6, par variante, dans site.js)
   const colors = ['#8a9096', '#1f2d44', '#e8e6e1'];
   // les voitures du couvert suivent le repère du bâtiment
@@ -384,10 +407,14 @@ bindShow('showLimits', site.groups.limits);
 bindShow('showPeople', site.groups.people);
 bindShow('showTerrace169', site.groups.terrace169);
 bindShow('showVisibility', site.groups.visibility);
-// variante P5/P6 : ?places=ouest (défaut) ou ?places=est, et sélecteur du panneau
+// servitude (bande orange) : masquée par défaut, affichée avec ?servitude dans l'URL
+$('showServitude').checked = QS.has('servitude');
+site.groups.servitude.visible = $('showServitude').checked;
+bindShow('showServitude', site.groups.servitude);
+// variante P5/P6 : ?places=est (défaut) ou ?places=ouest, et sélecteur du panneau
 {
   const ids = Object.keys(SCENARIO.p56);
-  let cur = ids.includes(QS.get('places')) ? QS.get('places') : 'ouest';
+  let cur = ids.includes(QS.get('places')) ? QS.get('places') : 'est';
   const seg = $('p56');
   const set = (id) => {
     cur = id; site.setP56(id);
@@ -401,7 +428,7 @@ bindShow('showVisibility', site.groups.visibility);
   }
   set(cur);
 }
-// implantation du bâtiment : conforme (défaut) ou ?implantation=actuelle ; la maquette étant
+// implantation du bâtiment : plan v2 (défaut) ou ?implantation=actuelle ; la maquette étant
 // construite au chargement, le sélecteur recharge la page avec le paramètre (autres paramètres conservés)
 {
   const seg = $('impl');
@@ -412,7 +439,7 @@ bindShow('showVisibility', site.groups.visibility);
     b.addEventListener('click', () => {
       if (id === IMPLANTATION) return;
       const q = new URLSearchParams(location.search);
-      if (id === 'conforme') q.delete('implantation'); else q.set('implantation', id);
+      if (id === 'plan') q.delete('implantation'); else q.set('implantation', id);
       const qs = q.toString().replace(/=(&|$)/g, '$1');      // ?reglages sans « = »
       location.search = qs ? '?' + qs : '';
     });
